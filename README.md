@@ -1,6 +1,6 @@
 # Procon Tools
 
-**Procon tools** is VSCode extension that supports you in cometitive programming using online judges.
+**Procon tools** is VSCode extension that supports you in competitive programming using online judges.
 
 ## Features
 
