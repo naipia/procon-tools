@@ -3,7 +3,7 @@ import * as fs from 'fs';
 
 function getResultHTML(context: vscode.ExtensionContext): Promise<string> {
   return new Promise((resolve) => {
-    const filename: string = context.extensionPath + '/src/html/result.html';
+    const filename: string = context.extensionPath + '/html/result.html';
     fs.readFile(filename, 'utf8', (err, data) => {
       if (err) {
         console.error(err);
@@ -15,7 +15,7 @@ function getResultHTML(context: vscode.ExtensionContext): Promise<string> {
 
 function getCaseHTML(context: vscode.ExtensionContext): Promise<string> {
   return new Promise((resolve) => {
-    const filename: string = context.extensionPath + '/src/html/case.html';
+    const filename: string = context.extensionPath + '/html/case.html';
     fs.readFile(filename, 'utf8', (err, data) => {
       if (err) {
         console.error(err);
