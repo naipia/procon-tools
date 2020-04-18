@@ -1,5 +1,7 @@
 # Procon Tools
 
+[![GitHub license](https://img.shields.io/github/license/naipia/procon-tools)](https://github.com/naipia/procon-tools)
+
 **Procon tools** is VSCode extension that supports you in competitive programming using online judges.
 
 ## Features
