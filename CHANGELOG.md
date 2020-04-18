@@ -4,7 +4,7 @@
 
 ## 0.0.3
 
-- Move html contents folder to the project root
+- Fixed a bug where the test results were not displayed
 
 ## 0.0.2
 
