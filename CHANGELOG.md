@@ -2,6 +2,10 @@
 
 <!-- ## [Unreleased] -->
 
+## 0.0.4
+
+- Fixed build failures when running tests on macOS
+
 ## 0.0.3
 
 - Fixed a bug where the test results were not displayed
