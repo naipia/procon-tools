@@ -2,7 +2,7 @@
 	"name": "procon-tools",
 	"displayName": "Procon Tools",
 	"description": "Procon Tools supports you in competitive programming using online judges.",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"engines": {
 		"vscode": "^1.44.0"
 	},
@@ -67,7 +67,7 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/naipia/procon-tools"
-	  },
+	},
 	"scripts": {
 		"vscode:prepublish": "yarn run compile",
 		"compile": "tsc -p ./",
