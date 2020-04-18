@@ -45,8 +45,8 @@ export function getResult(testcasesDir: string): Promise<string[][]> {
       const results: string[][] = [];
       for (let i = 0; i < resFiles.length; i++) {
         const resFilePath: string = testcasesDir + resFiles[i];
-        const inFilePath: string = resFilePath.replace(/.res.$/, '.in.');
-        const outFilePath: string = resFilePath.replace(/.res.$/, '.out.');
+        const inFilePath: string = resFilePath.replace(/.res./, '.in.');
+        const outFilePath: string = resFilePath.replace(/.res./, '.out.');
         const result = verify(resFilePath, outFilePath);
         const input = readfile(inFilePath);
         const expectOutput = readfile(outFilePath);
@@ -70,6 +70,7 @@ function runTestcase(
 ): Promise<string> {
   return new Promise((resolve) => {
     exec(baseCommand.replace('%IN', input).replace('%OUT', output), (err) => {
+      console.log(baseCommand.replace('%IN', input).replace('%OUT', output));
       if (err) {
         console.error(err);
         resolve('Runtime Error');

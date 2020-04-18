@@ -11,7 +11,8 @@
 	],
 	"activationEvents": [
 		"onCommand:procon-tools.contest",
-		"onCommand:procon-tools.login"
+		"onCommand:procon-tools.login",
+		"onCommand:procon-tools.test"
 	],
 	"publisher": "naipia",
 	"main": "./out/extension.js",
