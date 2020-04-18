@@ -8,7 +8,7 @@
 
 ## 0.0.2
 
-- Fixed an issue where input/output samples could not be read
+- Fixed a bug where input/output samples could not be read
 
 ## 0.0.1
 
