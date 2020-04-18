@@ -1,7 +1,7 @@
 {
 	"name": "procon-tools",
-	"displayName": "procon-tools",
-	"description": "Procon-tools supports you in competitive programming using online judges.",
+	"displayName": "Procon Tools",
+	"description": "Procon Tools supports you in competitive programming using online judges.",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.44.0"
@@ -13,6 +13,7 @@
 		"onCommand:procon-tools.contest",
 		"onCommand:procon-tools.login"
 	],
+	"publisher": "naipia",
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
