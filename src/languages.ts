@@ -17,7 +17,7 @@ const go: Language = {
 };
 
 export const getLanguage = (name: string): Language => {
-  if (name === 'cpp') {
+  if (name === 'C++') {
     return cPlusPlus;
   }
   return go;
