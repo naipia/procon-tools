@@ -1,43 +1,36 @@
 import * as vscode from 'vscode';
-
-import { languages } from './languages';
+import * as languages from './languages';
 
 export class Configuration {
   conf!: vscode.WorkspaceConfiguration;
-  home: string;
+  homeDir!: string;
   proconRoot!: string;
   language!: string;
   extension!: string;
   command!: string;
+  atdocerID!: string;
 
   constructor() {
-    const home: string | undefined = process.env.HOME;
-    if (home !== undefined) {
-      this.home = home;
-    } else {
-      this.home = '';
-    }
+    this.homeDir = process.env.HOME ? process.env.HOME : '';
     this.update();
   }
 
   public update(): void {
     this.conf = vscode.workspace.getConfiguration('procon-tools');
-    let proconPath: string | undefined = this.conf.get('home');
-    if (proconPath === undefined || proconPath === '') {
+    let proconPath = '~/contests';
+    if (this.conf.has('home')) {
+      proconPath = this.conf.get('home', proconPath);
+    } else {
       this.conf.update('home', '~/contests');
-      proconPath = '~/contests';
     }
-
     this.proconRoot = proconPath + '/';
     this.proconRoot = this.proconRoot.replace('//', '/');
-    this.proconRoot = this.proconRoot.replace(/^~/, this.home);
+    this.proconRoot = this.proconRoot.replace(/^~/, this.homeDir);
 
-    let lang: string | undefined = this.conf.get('language');
-    if (lang === undefined) {
-      lang = 'Go';
-    }
-    this.language = lang;
-    this.extension = languages[this.language].extension;
-    this.command = languages[this.language].command;
+    this.language = this.conf.get('language', 'Go');
+    const selectedLanguage = languages.getLanguage(this.language);
+    this.extension = selectedLanguage.extension;
+    this.command = selectedLanguage.command;
+    this.atdocerID = selectedLanguage.atdocerID;
   }
 }
