@@ -7,7 +7,6 @@ import { Configuration } from './configuration';
 import * as atcoder from './atcoder';
 import { updateResultWebview } from './webview';
 import { runAllTestcases, getResult } from './run';
-import { languages } from './languages';
 
 const REGEX_URL = /^https?:\/\//;
 
@@ -64,7 +63,7 @@ function submitAtcoder(
 
       const option: string = 'option[data-mime="%DATAMIME"]'.replace(
         '%DATAMIME',
-        languages[conf.language].atcoderID
+        conf.atdocerID
       );
 
       const languageID: string | undefined = result
