@@ -17,7 +17,7 @@ export class Configuration {
 
   public update(): void {
     this.conf = vscode.workspace.getConfiguration('procon-tools');
-    let proconPath: string = '~/contests';
+    let proconPath = '~/contests';
     if (this.conf.has('home')) {
       proconPath = this.conf.get('home', proconPath);
     } else {
@@ -26,7 +26,7 @@ export class Configuration {
     this.proconRoot = proconPath + '/';
     this.proconRoot = this.proconRoot.replace('//', '/');
     this.proconRoot = this.proconRoot.replace(/^~/, this.homeDir);
-    
+
     this.language = this.conf.get('language', 'Go');
     const selectedLanguage = languages.getLanguage(this.language);
     this.extension = selectedLanguage.extension;
