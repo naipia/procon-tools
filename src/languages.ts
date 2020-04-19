@@ -1,20 +1,24 @@
-interface LangInfo {
-  [key: string]: {
-    extension: string;
-    command: string;
-    atcoderID: string;
-  };
+interface Language {
+  extension: string,
+  command: string,
+  atdocerID: string
 }
 
-export const languages: LangInfo = {
-  'C++': {
-    extension: 'cpp',
-    command: 'g++ -o /tmp/main %S && /tmp/main < %IN > %OUT',
-    atcoderID: 'text/x-c++src',
-  },
-  Go: {
-    extension: 'go',
-    command: 'go build -o /tmp/main %S && /tmp/main < %IN > %OUT',
-    atcoderID: 'text/x-go',
-  },
-};
+const cPlusPlus: Language = {
+  extension: 'cpp',
+  command: 'g++ -o /tmp/main %S && /tmp/main < %IN > %OUT',
+  atdocerID: 'text/x-c++src'
+}
+
+const go: Language = {
+  extension: 'go',
+  command: 'go build -o /tmp/main %S && /tmp/main < %IN > %OUT',
+  atdocerID: 'text/x-go'
+}
+
+export const getLanguage = (name: string): Language => {
+  if (name === 'cpp') {
+    return cPlusPlus;
+  }
+  return go;
+}
