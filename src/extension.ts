@@ -7,13 +7,15 @@ import { Configuration } from './configuration';
 import * as atcoder from './atcoder';
 import { updateResultWebview } from './webview';
 import { runAllTestcases, getResult } from './run';
+import { LoginInfo, saveLoginInfo, getLoginInfo } from './login';
 
 const REGEX_URL = /^https?:\/\//;
 
 const conf = new Configuration();
+let atcoderLogin = false;
 
 // Identify the contest site from the URL and get ready for the contest
-function contestController(inputUrl: string): void {
+async function contestController(inputUrl: string): Promise<void> {
   const contestUrlParse: url.UrlWithStringQuery = url.parse(inputUrl);
   const contestUrlParseHost: string | null = contestUrlParse.host;
   if (!contestUrlParseHost) {
@@ -22,6 +24,24 @@ function contestController(inputUrl: string): void {
 
   if (contestUrlParseHost.match(/atcoder/)) {
     console.log('AtCoder');
+    if (!atcoderLogin) {
+      const loginInfo: LoginInfo = getLoginInfo('AtCoder', conf.homeDir);
+      if (!loginInfo) {
+        vscode.window.showInformationMessage(
+          'There is no login information for AtCoder.'
+        );
+      } else {
+        const status: boolean = await atcoder.login(
+          loginInfo.username,
+          loginInfo.password
+        );
+        if (!status) {
+          vscode.window.showInformationMessage('Failed to login.');
+        } else {
+          atcoderLogin = true;
+        }
+      }
+    }
     const text = atcoder.contestInit(
       conf.proconRoot,
       contestUrlParse,
@@ -187,42 +207,71 @@ export function activate(context: vscode.ExtensionContext): void {
 
       if (contestName === 'AtCoder') {
         console.log(contestName);
-        atcoder.login(username, password);
+        const status: boolean = await atcoder.login(username, password);
+        if (status) {
+          vscode.window.showInformationMessage('Login successful.');
+          atcoderLogin = true;
+          saveLoginInfo(contestName, conf.homeDir, username, password);
+        } else {
+          vscode.window.showInformationMessage('Failed to login.');
+        }
       }
     });
   });
 
   // Submit a code
-  const cmd4 = vscode.commands.registerCommand('procon-tools.submit', () => {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      return;
-    }
+  const cmd4 = vscode.commands.registerCommand(
+    'procon-tools.submit',
+    async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        return;
+      }
 
-    const activeFilePath: string = editor.document.fileName;
-    if (activeFilePath.split('.').pop() !== conf.extension) {
-      return;
-    }
+      const activeFilePath: string = editor.document.fileName;
+      if (activeFilePath.split('.').pop() !== conf.extension) {
+        return;
+      }
 
-    const fileName: string | undefined = activeFilePath.split('/').pop();
-    if (!fileName) {
-      return;
-    }
+      const fileName: string | undefined = activeFilePath.split('/').pop();
+      if (!fileName) {
+        return;
+      }
 
-    const taskName: string | undefined = fileName.split('.')[0];
-    if (!taskName) {
-      return;
-    }
+      const taskName: string | undefined = fileName.split('.')[0];
+      if (!taskName) {
+        return;
+      }
 
-    const contestName: string = taskName.split('_')[0];
-    if (activeFilePath.match(/atcoder/)) {
-      const atcoderSubmitUrl: string = 'https://atcoder.jp/contests/%CONTEST_NAME/submit'.replace(
-        '%CONTEST_NAME',
-        contestName
-      );
-      submitAtcoder(activeFilePath, atcoderSubmitUrl, taskName);
+      const contest: string = taskName.split('_')[0];
+      console.log(atcoderLogin);
+      if (activeFilePath.match(/atcoder/)) {
+        if (!atcoderLogin) {
+          const loginInfo: LoginInfo = getLoginInfo('AtCoder', conf.homeDir);
+          if (!loginInfo) {
+            vscode.window.showInformationMessage(
+              'You will need to register your login information.'
+            );
+            return;
+          }
+          const status: boolean = await atcoder.login(
+            loginInfo.username,
+            loginInfo.password
+          );
+          if (!status) {
+            vscode.window.showInformationMessage('Failed to login.');
+            return;
+          }
+          atcoderLogin = true;
+        }
+        const atcoderSubmitUrl: string = 'https://atcoder.jp/contests/%CONTEST_NAME/submit'.replace(
+          '%CONTEST_NAME',
+          contest
+        );
+        submitAtcoder(activeFilePath, atcoderSubmitUrl, taskName);
+      }
     }
-  });
+  );
 
   vscode.workspace.onDidChangeConfiguration(() => {
     conf.update();
