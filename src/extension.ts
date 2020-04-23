@@ -89,7 +89,13 @@ function submitAtcoder(
           if (res.error) {
             console.error(res.error);
           }
-          vscode.window.showInformationMessage(taskName + ' was submitted!');
+          vscode.window
+            .showInformationMessage(taskName + ' was submitted!', 'Result')
+            .then(() => {
+              vscode.env.openExternal(
+                vscode.Uri.parse(submitUrl.replace('submit', 'submissions/me'))
+              );
+            });
         });
     });
   });
