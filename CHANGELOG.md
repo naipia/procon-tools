@@ -6,6 +6,7 @@
 - Added a link button to the results page after submission
 - Added a "Run tests" command icon
 - Added default keybindings
+- Added pre-submission confirmation
 
 ## 0.0.4
 
