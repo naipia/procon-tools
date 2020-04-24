@@ -238,14 +238,16 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
 
-      const submit: string | undefined = await vscode.window.showQuickPick(
-        ['Yes', 'No'],
-        {
-          placeHolder: 'Submit ' + fileName,
+      if (conf.confirmation) {
+        const submit: string | undefined = await vscode.window.showQuickPick(
+          ['Yes', 'No'],
+          {
+            placeHolder: 'Submit ' + fileName,
+          }
+        );
+        if (!submit || submit === 'No') {
+          return;
         }
-      );
-      if (submit === 'No') {
-        return;
       }
 
       const taskName: string | undefined = fileName.split('.')[0];

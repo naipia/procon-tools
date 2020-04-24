@@ -63,7 +63,7 @@
         "procon-tools.home": {
           "type": "string",
           "default": "~/contests",
-          "description": "Set a working directory for contests. The default is \"~/contests\"."
+          "description": "Set a working directory for contests. The default is \"~/contests\""
         },
         "procon-tools.language": {
           "type": "string",
@@ -72,7 +72,12 @@
             "Go"
           ],
           "default": "C++",
-          "description": "Set a language of automatically generated source files."
+          "description": "Set a language of automatically generated source files"
+        },
+        "procon-tools.pre-submission": {
+          "type": "boolean",
+          "default": true,
+          "description": "Confirm before submitting a code"
         }
       }
     }
