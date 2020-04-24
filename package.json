@@ -2,7 +2,7 @@
   "name": "procon-tools",
   "displayName": "Procon Tools",
   "description": "Procon Tools supports you in competitive programming using online judges.",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -12,7 +12,8 @@
   "activationEvents": [
     "onCommand:procon-tools.contest",
     "onCommand:procon-tools.login",
-    "onCommand:procon-tools.test"
+    "onCommand:procon-tools.test",
+    "onCommand:procon-tools.submit"
   ],
   "publisher": "naipia",
   "main": "./out/extension.js",
@@ -20,29 +21,41 @@
     "commands": [
       {
         "command": "procon-tools.contest",
-        "title": "Start contest"
+        "title": "Procon: Start contest"
       },
       {
         "command": "procon-tools.test",
-        "title": "▷ Run tests"
+        "title": "Procon: Run tests",
+        "icon": "img/run.png"
       },
       {
         "command": "procon-tools.login",
-        "title": "Login"
+        "title": "Procon: Login"
       },
       {
         "command": "procon-tools.submit",
-        "title": "Submit code"
+        "title": "Procon: Submit code"
       }
     ],
     "menus": {
       "editor/title": [
         {
+          "when": "editorFocus && resource=~/atcoder/",
           "command": "procon-tools.test",
           "group": "navigation"
         }
       ]
     },
+    "keybindings":[
+      {
+        "command": "procon-tools.test",
+        "key": "alt+enter"
+      },
+      {
+        "command": "procon-tools.contest",
+        "key": "alt+d"
+      }
+    ],
     "configuration": {
       "type": "obhect",
       "title": "Procon Tools",
@@ -50,7 +63,7 @@
         "procon-tools.home": {
           "type": "string",
           "default": "~/contests",
-          "description": "Set a working directory for contests. The default is \"~/contests\"."
+          "description": "Set a working directory for contests. The default is \"~/contests\""
         },
         "procon-tools.language": {
           "type": "string",
@@ -59,7 +72,12 @@
             "Go"
           ],
           "default": "C++",
-          "description": "Set a language of automatically generated source files."
+          "description": "Set a language of automatically generated source files"
+        },
+        "procon-tools.pre-submission": {
+          "type": "boolean",
+          "default": true,
+          "description": "Confirm before submitting a code"
         }
       }
     }

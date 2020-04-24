@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as url from 'url';
 import * as cheerio from 'cheerio-httpcli';
@@ -121,32 +120,34 @@ export function contestInit(
   }
 }
 
-export function login(username: string, password: string): void {
-  cheerio.fetch('https://atcoder.jp/login', {}).then((result) => {
-    const csrfToken: string | undefined = result
-      .$('form')
-      .find('input')
-      .attr('value');
-    if (csrfToken === undefined) {
-      return;
-    }
+export function login(username: string, password: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    cheerio.fetch('https://atcoder.jp/login', {}).then((result) => {
+      const csrfToken: string | undefined = result
+        .$('form')
+        .find('input')
+        .attr('value');
+      if (csrfToken === undefined) {
+        return;
+      }
 
-    const loginInfo = {
-      csrf_token: csrfToken,
-      username: username,
-      password: password,
-    };
+      const loginInfo = {
+        csrf_token: csrfToken,
+        username: username,
+        password: password,
+      };
 
-    result
-      .$('form[class=form-horizontal]')
-      .submit(loginInfo)
-      .then((result) => {
-        const title: string = result.$('title').text();
-        if (title === 'Sign In - AtCoder') {
-          vscode.window.showInformationMessage('Failed to login.');
-        } else {
-          vscode.window.showInformationMessage('Login successful.');
-        }
-      });
+      result
+        .$('form[class=form-horizontal]')
+        .submit(loginInfo)
+        .then((result) => {
+          const title: string = result.$('title').text();
+          if (title === 'Sign In - AtCoder') {
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        });
+    });
   });
 }

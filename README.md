@@ -8,16 +8,15 @@
 
 Give the following commands to the VSCode command palette:
 
-- Download testcases: `Start contest`
+- `Start contest` (Alt+d): Download testcases and create source files needed for the contest
   - This extension will download the testcases when you run `Start contest` command and enter the URL.
-- Create source files needed for the contest
   - Source files needed for the contest are automatically generated when you run `Start contest` command.
-- Run tests: `Run tests`
-  - This extension will run the code in the source file and check the answers to all the tests when you run `Run tests` command or press the "▷ Run tests" button.
-- Submit code: `Submit code`
+- `Run tests` (Alt+Enter): Run all testcases
+  - This extension will run the code in the source file and check the answers to all the tests when you run `Run tests` command or press <img src="img/run.png" width="15"> button.
+- `Submit code`: Submit code
   - This extension will submit the code based on the generated source file when you run `Submit code` command.
-- Login: `Login`
-  - You need to login once with `Login` command before submitting.
+- `Login`: Login
+  - Once you login, this extension will login automatically the next time. Login information is saved in your home directory ( `~/.procon-tools` ).
 
 ## Contest sites supported by Procon Tools
 
@@ -35,5 +34,6 @@ Give the following commands to the VSCode command palette:
 
 ## Extension Settings
 
-- `procon-tools.home`: Set a working directory path for contests. The default is `~/contests`.
-- `procon-tools.language`: Set a language of automatically generated source files. The default is C++.
+- `procon-tools.home`: Set a working directory path for contests. The default is `~/contests`
+- `procon-tools.language`: Set a language of automatically generated source files. The default is C++
+- `procon-tools.pre-submission`: Confirm before submitting a code

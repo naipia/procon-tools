@@ -8,6 +8,7 @@ export class Configuration {
   language!: string;
   extension!: string;
   command!: string;
+  confirmation!: boolean;
   atdocerID!: string;
 
   constructor() {
@@ -27,10 +28,11 @@ export class Configuration {
     this.proconRoot = this.proconRoot.replace('//', '/');
     this.proconRoot = this.proconRoot.replace(/^~/, this.homeDir);
 
-    this.language = this.conf.get('language', 'Go');
+    this.language = this.conf.get('language', 'C++');
     const selectedLanguage = languages.getLanguage(this.language);
     this.extension = selectedLanguage.extension;
     this.command = selectedLanguage.command;
     this.atdocerID = selectedLanguage.atdocerID;
+    this.confirmation = this.conf.get('pre-submission', true);
   }
 }
