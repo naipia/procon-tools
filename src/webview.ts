@@ -43,6 +43,6 @@ export async function updateResultWebview(
         .replace(/%STATUS/g, results[i][3]) + '\n';
   }
   panel.webview.html = resultDoc
-    .replace('%TITLE', sourceFile.split('.')[0].toUpperCase())
+    .replace('%TITLE', sourceFile.split('.')[0].replace('_', ' ').toUpperCase())
     .replace('%CASE', cases);
 }
