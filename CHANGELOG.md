@@ -1,6 +1,8 @@
 # Change Log
 
-## [Unreleased]
+<!-- ## [Unreleased] -->
+
+## 0.1.0
 
 - Added auto-login
 - Added a link button to the results page after submission
