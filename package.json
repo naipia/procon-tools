@@ -21,29 +21,41 @@
     "commands": [
       {
         "command": "procon-tools.contest",
-        "title": "Start contest"
+        "title": "Procon: Start contest"
       },
       {
         "command": "procon-tools.test",
-        "title": "▷ Run tests"
+        "title": "Procon: Run tests",
+        "icon": "img/run.png"
       },
       {
         "command": "procon-tools.login",
-        "title": "Login"
+        "title": "Procon: Login"
       },
       {
         "command": "procon-tools.submit",
-        "title": "Submit code"
+        "title": "Procon: Submit code"
       }
     ],
     "menus": {
       "editor/title": [
         {
+          "when": "editorFocus && resource=~/atcoder/",
           "command": "procon-tools.test",
           "group": "navigation"
         }
       ]
     },
+    "keybindings":[
+      {
+        "command": "procon-tools.test",
+        "key": "alt+enter"
+      },
+      {
+        "command": "procon-tools.contest",
+        "key": "alt+d"
+      }
+    ],
     "configuration": {
       "type": "obhect",
       "title": "Procon Tools",
