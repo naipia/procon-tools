@@ -238,13 +238,22 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
 
+      const submit: string | undefined = await vscode.window.showQuickPick(
+        ['Yes', 'No'],
+        {
+          placeHolder: 'Submit ' + fileName,
+        }
+      );
+      if (submit === 'No') {
+        return;
+      }
+
       const taskName: string | undefined = fileName.split('.')[0];
       if (!taskName) {
         return;
       }
 
       const contest: string = taskName.split('_')[0];
-      console.log(atcoderLogin);
       if (activeFilePath.match(/atcoder/)) {
         if (!atcoderLogin) {
           const loginInfo: LoginInfo = getLoginInfo('AtCoder', conf.homeDir);
