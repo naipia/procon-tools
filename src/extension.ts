@@ -40,6 +40,19 @@ async function contestController(inputUrl: string): Promise<void> {
   vscode.window.showInformationMessage(message);
 }
 
+function getActiveFilePath(): string | undefined {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return undefined;
+  }
+
+  const activeFilePath: string = editor.document.fileName;
+  if (activeFilePath.split('.').pop() !== conf.extension) {
+    return undefined;
+  }
+  return activeFilePath;
+}
+
 export function activate(context: vscode.ExtensionContext): void {
   let panel: vscode.WebviewPanel;
   let isPanelAlive = false;
@@ -66,12 +79,8 @@ export function activate(context: vscode.ExtensionContext): void {
   const cmd2 = vscode.commands.registerCommand(
     'procon-tools.test',
     async () => {
-      const editor = vscode.window.activeTextEditor;
-      if (!editor) {
-        return;
-      }
-      const activeFilePath: string = editor.document.fileName;
-      if (activeFilePath.split('.').pop() !== conf.extension) {
+      const activeFilePath: string | undefined = getActiveFilePath();
+      if (!activeFilePath) {
         return;
       }
       const sourceFile: string | undefined = activeFilePath.split('/').pop();
@@ -142,13 +151,8 @@ export function activate(context: vscode.ExtensionContext): void {
   const cmd4 = vscode.commands.registerCommand(
     'procon-tools.submit',
     async () => {
-      const editor = vscode.window.activeTextEditor;
-      if (!editor) {
-        return;
-      }
-
-      const activeFilePath: string = editor.document.fileName;
-      if (activeFilePath.split('.').pop() !== conf.extension) {
+      const activeFilePath: string | undefined = getActiveFilePath();
+      if (!activeFilePath) {
         return;
       }
 
