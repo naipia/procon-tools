@@ -14,13 +14,8 @@ function mkdir(dir: string): void {
   }
 }
 
-function createSource(
-  taskDir: string,
-  task: string,
-  extension: string
-): Promise<void> {
+function createSource(filename: string): Promise<void> {
   return new Promise((resolve) => {
-    const filename: string = taskDir + '/' + task + '.' + extension;
     if (!fs.existsSync(filename)) {
       fs.writeFileSync(filename, '');
     }
@@ -94,6 +89,7 @@ export function contestInit(
   if (!task || task[1] !== contestName) {
     cheerio.fetch(taskListUrl, {}).then(async (result) => {
       const elements = result.$('tbody').find('td').find('a');
+      let first = '';
       for (let i = 0; i < elements.length; i++) {
         const alphabet = result.$(elements[i]).text();
         if (alphabet.match(/^[A-Z]{1}[1-9]*$/)) {
@@ -103,30 +99,31 @@ export function contestInit(
           if (!contestUrl) {
             continue;
           }
-          const filename = contestUrl.split('/').pop();
-          if (!filename) {
-            continue;
-          }
           const taskUrl: string = ATCODER_URL + contestUrl;
           const taskDir: string =
             contestDir + alphabet.toString().toLowerCase();
+          const filename: string =
+            taskDir + '/' + contestUrl.split('/').pop() + '.' + conf.extension;
+          if (first === '') {
+            first = filename;
+          }
           mkdir(taskDir);
           mkdir(taskDir + '/testcases');
           getTestcases(taskUrl, taskDir);
-          await createSource(taskDir, filename, conf.extension);
+          await createSource(filename);
         }
       }
+      createSource(first);
     });
 
     return contestName;
   } else {
-    const contestUrl: string = taskListUrl + '/' + contestName + '_';
-    const taskUrl: string = contestUrl + task[2];
     const taskDir: string = contestDir + task[2];
+    const filename: string = taskDir + '/' + leaf + '.' + conf.extension;
     mkdir(taskDir);
     mkdir(taskDir + '/testcases');
-    createSource(taskDir, contestName + '_' + task[2], conf.extension);
-    getTestcases(taskUrl, taskDir);
+    getTestcases(contestUrlParse.href, taskDir);
+    createSource(filename);
 
     return contestName + ' ' + task[2];
   }
