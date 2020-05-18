@@ -91,30 +91,36 @@ export function contestInit(
   const task: RegExpMatchArray | null = leaf.match(/(.+)_(.+)/);
   const taskListUrl: string =
     ATCODER_URL + '/contests/' + contestName + '/tasks';
-  const contestUrl: string = taskListUrl + '/' + contestName + '_';
   if (!task || task[1] !== contestName) {
     cheerio.fetch(taskListUrl, {}).then(async (result) => {
       const elements = result.$('tbody').find('td').find('a');
       for (let i = 0; i < elements.length; i++) {
         const alphabet = result.$(elements[i]).text();
         if (alphabet.match(/^[A-Z]{1}[1-9]*$/)) {
-          const filename = alphabet.toString().toLowerCase();
-          const taskUrl: string = contestUrl + filename;
-          const taskDir: string = contestDir + filename;
+          const contestUrl: string | undefined = result
+            .$(elements[i])
+            .attr('href');
+          if (!contestUrl) {
+            continue;
+          }
+          const filename = contestUrl.split('/').pop();
+          if (!filename) {
+            continue;
+          }
+          const taskUrl: string = ATCODER_URL + contestUrl;
+          const taskDir: string =
+            contestDir + alphabet.toString().toLowerCase();
           mkdir(taskDir);
           mkdir(taskDir + '/testcases');
           getTestcases(taskUrl, taskDir);
-          await createSource(
-            taskDir,
-            contestName + '_' + filename,
-            conf.extension
-          );
+          await createSource(taskDir, filename, conf.extension);
         }
       }
     });
 
     return contestName;
   } else {
+    const contestUrl: string = taskListUrl + '/' + contestName + '_';
     const taskUrl: string = contestUrl + task[2];
     const taskDir: string = contestDir + task[2];
     mkdir(taskDir);

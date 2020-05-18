@@ -184,24 +184,18 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
 
-      const contest: string = taskName.split('_')[0];
-      if (activeFilePath.match(/atcoder/)) {
+      const contest: string[] = activeFilePath
+        .replace(conf.proconRoot, '')
+        .split('/');
+      if (contest[0] === 'atcoder') {
         if (!atcoderLogin) {
           const loginInfo: LoginInfo = getLoginInfo('AtCoder', conf.homeDir);
-          if (!loginInfo) {
-            vscode.window.showInformationMessage(
-              'You will need to register your login information.'
-            );
+          atcoderLogin = await atcoder.autologin(loginInfo);
+          if (!atcoderLogin) {
             return;
           }
-          const status: boolean = await atcoder.login(loginInfo);
-          if (!status) {
-            vscode.window.showInformationMessage('Failed to login.');
-            return;
-          }
-          atcoderLogin = true;
         }
-        atcoder.submit(activeFilePath, contest, taskName, conf);
+        atcoder.submit(activeFilePath, contest[1], taskName, conf);
       }
     }
   );
