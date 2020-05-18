@@ -1,7 +1,5 @@
 import * as vscode from 'vscode';
 import * as url from 'url';
-import * as cheerio from 'cheerio-httpcli';
-import * as fs from 'fs';
 
 import { Configuration } from './configuration';
 import * as atcoder from './atcoder';
@@ -14,7 +12,6 @@ const REGEX_URL = /^https?:\/\//;
 const conf = new Configuration();
 let atcoderLogin = false;
 
-// Identify the contest site from the URL and get ready for the contest
 async function contestController(inputUrl: string): Promise<void> {
   const contestUrlParse: url.UrlWithStringQuery = url.parse(inputUrl);
   const contestUrlParseHost: string | null = contestUrlParse.host;
@@ -22,103 +19,25 @@ async function contestController(inputUrl: string): Promise<void> {
     return;
   }
 
+  let message: string;
   if (contestUrlParseHost.match(/atcoder/)) {
-    console.log('AtCoder');
     if (!atcoderLogin) {
       const loginInfo: LoginInfo = getLoginInfo('AtCoder', conf.homeDir);
-      if (!loginInfo) {
-        vscode.window.showInformationMessage(
-          'There is no login information for AtCoder.'
-        );
-      } else {
-        const status: boolean = await atcoder.login(
-          loginInfo.username,
-          loginInfo.password
-        );
-        if (!status) {
-          vscode.window.showInformationMessage('Failed to login.');
-        } else {
-          atcoderLogin = true;
-        }
-      }
+      atcoderLogin = await atcoder.autologin(loginInfo);
     }
-    const text = atcoder.contestInit(
-      conf.proconRoot,
-      contestUrlParse,
-      conf.extension
-    );
+    const text = atcoder.contestInit(conf, contestUrlParse);
     if (!text) {
-      console.log('Failed to initialize.');
-      return;
+      message = 'Failed to initialize.';
+    } else {
+      message = 'AtCoder: ' + text;
     }
-    vscode.window.showInformationMessage('AtCoder: ' + text);
   } else {
-    const message: string =
+    message =
       'This extension dose not support this site: "' +
       contestUrlParse.host?.toString() +
       '"';
-    vscode.window.showInformationMessage(message);
-    return;
   }
-}
-
-// Submit to the selected site
-function submitAtcoder(
-  activeFilePath: string,
-  submitUrl: string,
-  taskName: string
-): void {
-  fs.readFile(activeFilePath, 'utf8', (err, data) => {
-    if (err) {
-      console.log(err);
-    }
-    cheerio.fetch(submitUrl, {}).then((result) => {
-      const csrfToken: string | undefined = result
-        .$('form')
-        .find('input')
-        .attr('value');
-      if (csrfToken === undefined) {
-        return;
-      }
-
-      const option: string = 'option[data-mime="%DATAMIME"]'.replace(
-        '%DATAMIME',
-        conf.atdocerID
-      );
-
-      const languageID: string | undefined = result
-        .$('div[id=select-lang]')
-        .find('select')
-        .find(option)
-        .attr('value');
-      if (languageID === undefined) {
-        return;
-      }
-
-      const submitInfo = {
-        csrf_token: csrfToken,
-        'data.TaskScreenName': taskName,
-        'data.LanguageId': languageID,
-        sourceCode: data,
-      };
-
-      result
-        .$('form[class="form-horizontal form-code-submit"]')
-        .submit(submitInfo)
-        .then((res) => {
-          if (res.error) {
-            console.error(res.error);
-          }
-          vscode.window
-            .showInformationMessage(taskName + ' was submitted!', 'Result')
-            .then(() => {
-              vscode.env.openExternal(
-                vscode.Uri.parse(submitUrl.replace('submit', 'submissions/me'))
-              );
-            });
-        });
-    });
-  });
+  vscode.window.showInformationMessage(message);
 }
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -136,7 +55,7 @@ export function activate(context: vscode.ExtensionContext): void {
         },
       })
       .then((inputUrl) => {
-        if (inputUrl === undefined) {
+        if (!inputUrl) {
           return;
         }
         contestController(inputUrl);
@@ -151,14 +70,12 @@ export function activate(context: vscode.ExtensionContext): void {
       if (!editor) {
         return;
       }
-
       const activeFilePath: string = editor.document.fileName;
       if (activeFilePath.split('.').pop() !== conf.extension) {
         return;
       }
-
       const sourceFile: string | undefined = activeFilePath.split('/').pop();
-      if (sourceFile === undefined) {
+      if (!sourceFile) {
         return;
       }
 
@@ -206,11 +123,13 @@ export function activate(context: vscode.ExtensionContext): void {
       }
 
       if (contestName === 'AtCoder') {
-        console.log(contestName);
-        const status: boolean = await atcoder.login(username, password);
-        if (status) {
+        const loginInfo = {
+          username: username,
+          password: password,
+        };
+        atcoderLogin = await atcoder.login(loginInfo);
+        if (atcoderLogin) {
           vscode.window.showInformationMessage('Login successful.');
-          atcoderLogin = true;
           saveLoginInfo(contestName, conf.homeDir, username, password);
         } else {
           vscode.window.showInformationMessage('Failed to login.');
@@ -265,21 +184,14 @@ export function activate(context: vscode.ExtensionContext): void {
             );
             return;
           }
-          const status: boolean = await atcoder.login(
-            loginInfo.username,
-            loginInfo.password
-          );
+          const status: boolean = await atcoder.login(loginInfo);
           if (!status) {
             vscode.window.showInformationMessage('Failed to login.');
             return;
           }
           atcoderLogin = true;
         }
-        const atcoderSubmitUrl: string = 'https://atcoder.jp/contests/%CONTEST_NAME/submit'.replace(
-          '%CONTEST_NAME',
-          contest
-        );
-        submitAtcoder(activeFilePath, atcoderSubmitUrl, taskName);
+        atcoder.submit(activeFilePath, contest, taskName, conf);
       }
     }
   );
