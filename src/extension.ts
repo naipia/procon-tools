@@ -4,7 +4,7 @@ import * as url from 'url';
 import { Configuration } from './configuration';
 import * as atcoder from './atcoder';
 import { updateResultWebview } from './webview';
-import { runAllTestcases, getResult } from './run';
+import { runAllTestcases, getResult, build } from './run';
 import { LoginInfo, saveLoginInfo, getLoginInfo } from './login';
 
 const REGEX_URL = /^https?:\/\//;
@@ -90,6 +90,12 @@ export function activate(context: vscode.ExtensionContext): void {
 
       const taskDir: string = activeFilePath.replace(sourceFile, '');
       const testcasesDir: string = taskDir + 'testcases/';
+      const buildCommand: string = conf.build.replace('%S', activeFilePath);
+      const buildStatus: boolean = await build(buildCommand);
+      if (!buildStatus) {
+        vscode.window.showInformationMessage('Compile Error');
+        return;
+      }
       const baseCommand: string = conf.command.replace('%S', activeFilePath);
       await runAllTestcases(testcasesDir, baseCommand);
       const results: string[][] = await getResult(testcasesDir);

@@ -108,3 +108,18 @@ export function runAllTestcases(
     });
   });
 }
+
+export function build(buildCommand: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (buildCommand === '') {
+      resolve(true);
+    }
+    exec(buildCommand, (err) => {
+      if (err) {
+        console.error(err);
+        resolve(false);
+      }
+      resolve(true);
+    });
+  });
+}
