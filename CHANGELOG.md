@@ -2,6 +2,10 @@
 
 <!-- ## [Unreleased] -->
 
+## 0.1.1
+
+- Fixed an bug in ABC that was held concurrently with ARC
+
 ## 0.1.0
 
 - Added auto-login

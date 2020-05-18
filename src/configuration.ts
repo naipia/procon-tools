@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as os from 'os';
 import * as languages from './languages';
 
 export class Configuration {
@@ -7,6 +8,7 @@ export class Configuration {
   proconRoot!: string;
   language!: string;
   extension!: string;
+  build!: string;
   command!: string;
   confirmation!: boolean;
   atdocerID!: string;
@@ -31,7 +33,8 @@ export class Configuration {
     this.language = this.conf.get('language', 'C++');
     const selectedLanguage = languages.getLanguage(this.language);
     this.extension = selectedLanguage.extension;
-    this.command = selectedLanguage.command;
+    this.build = selectedLanguage.build.replace(/%TMP/, os.tmpdir());
+    this.command = selectedLanguage.command.replace(/%TMP/, os.tmpdir());
     this.atdocerID = selectedLanguage.atdocerID;
     this.confirmation = this.conf.get('pre-submission', true);
   }

@@ -1,7 +1,10 @@
+import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as url from 'url';
 import * as cheerio from 'cheerio-httpcli';
 import { exec } from 'child_process';
+import { Configuration } from './configuration';
+import { LoginInfo } from './login';
 
 const ATCODER_URL = 'https://atcoder.jp';
 
@@ -11,13 +14,8 @@ function mkdir(dir: string): void {
   }
 }
 
-function createSource(
-  taskDir: string,
-  task: string,
-  extension: string
-): Promise<void> {
+function createSource(filename: string): Promise<void> {
   return new Promise((resolve) => {
-    const filename: string = taskDir + '/' + task + '.' + extension;
     if (!fs.existsSync(filename)) {
       fs.writeFileSync(filename, '');
     }
@@ -59,13 +57,12 @@ function getTestcases(taskUrl: string, taskDir: string): void {
 }
 
 export function contestInit(
-  proconRoot: string,
-  contestUrlParse: url.UrlWithStringQuery,
-  extension: string
+  conf: Configuration,
+  contestUrlParse: url.UrlWithStringQuery
 ): string | null {
-  mkdir(proconRoot);
+  mkdir(conf.proconRoot);
 
-  const contestRoot: string = proconRoot + 'atcoder';
+  const contestRoot: string = conf.proconRoot + 'atcoder';
   mkdir(contestRoot);
 
   const contestPathname: string | null = contestUrlParse.pathname;
@@ -89,38 +86,50 @@ export function contestInit(
   const task: RegExpMatchArray | null = leaf.match(/(.+)_(.+)/);
   const taskListUrl: string =
     ATCODER_URL + '/contests/' + contestName + '/tasks';
-  const contestUrl: string = taskListUrl + '/' + contestName + '_';
   if (!task || task[1] !== contestName) {
     cheerio.fetch(taskListUrl, {}).then(async (result) => {
       const elements = result.$('tbody').find('td').find('a');
+      let first = '';
       for (let i = 0; i < elements.length; i++) {
         const alphabet = result.$(elements[i]).text();
         if (alphabet.match(/^[A-Z]{1}[1-9]*$/)) {
-          const filename = alphabet.toString().toLowerCase();
-          const taskUrl: string = contestUrl + filename;
-          const taskDir: string = contestDir + filename;
+          const contestUrl: string | undefined = result
+            .$(elements[i])
+            .attr('href');
+          if (!contestUrl) {
+            continue;
+          }
+          const taskUrl: string = ATCODER_URL + contestUrl;
+          const taskDir: string =
+            contestDir + alphabet.toString().toLowerCase();
+          const filename: string =
+            taskDir + '/' + contestUrl.split('/').pop() + '.' + conf.extension;
+          if (first === '') {
+            first = filename;
+          }
           mkdir(taskDir);
           mkdir(taskDir + '/testcases');
           getTestcases(taskUrl, taskDir);
-          await createSource(taskDir, contestName + '_' + filename, extension);
+          await createSource(filename);
         }
       }
+      createSource(first);
     });
 
     return contestName;
   } else {
-    const taskUrl: string = contestUrl + task[2];
     const taskDir: string = contestDir + task[2];
+    const filename: string = taskDir + '/' + leaf + '.' + conf.extension;
     mkdir(taskDir);
     mkdir(taskDir + '/testcases');
-    createSource(taskDir, contestName + '_' + task[2], extension);
-    getTestcases(taskUrl, taskDir);
+    getTestcases(contestUrlParse.href, taskDir);
+    createSource(filename);
 
     return contestName + ' ' + task[2];
   }
 }
 
-export function login(username: string, password: string): Promise<boolean> {
+export function login(loginInfo: LoginInfo): Promise<boolean> {
   return new Promise((resolve) => {
     cheerio.fetch('https://atcoder.jp/login', {}).then((result) => {
       const csrfToken: string | undefined = result
@@ -131,15 +140,15 @@ export function login(username: string, password: string): Promise<boolean> {
         return;
       }
 
-      const loginInfo = {
+      const submitInfo = {
         csrf_token: csrfToken,
-        username: username,
-        password: password,
+        username: loginInfo.username,
+        password: loginInfo.password,
       };
 
       result
         .$('form[class=form-horizontal]')
-        .submit(loginInfo)
+        .submit(submitInfo)
         .then((result) => {
           const title: string = result.$('title').text();
           if (title === 'Sign In - AtCoder') {
@@ -147,6 +156,83 @@ export function login(username: string, password: string): Promise<boolean> {
           } else {
             resolve(true);
           }
+        });
+    });
+  });
+}
+
+export async function autologin(loginInfo: LoginInfo): Promise<boolean> {
+  if (!loginInfo) {
+    vscode.window.showInformationMessage(
+      'There is no login information for AtCoder.'
+    );
+  } else {
+    if (await login(loginInfo)) {
+      return true;
+    }
+  }
+  vscode.window.showInformationMessage('Failed to login.');
+  return false;
+}
+
+export function submit(
+  activeFilePath: string,
+  contest: string,
+  taskName: string,
+  conf: Configuration
+): void {
+  const submitUrl: string = 'https://atcoder.jp/contests/%CONTEST_NAME/submit'.replace(
+    '%CONTEST_NAME',
+    contest
+  );
+  fs.readFile(activeFilePath, 'utf8', (err, data) => {
+    if (err) {
+      console.log(err);
+    }
+    cheerio.fetch(submitUrl, {}).then((result) => {
+      const csrfToken: string | undefined = result
+        .$('form')
+        .find('input')
+        .attr('value');
+      if (csrfToken === undefined) {
+        return;
+      }
+
+      const option: string = 'option[data-mime="%DATAMIME"]'.replace(
+        '%DATAMIME',
+        conf.atdocerID
+      );
+
+      const languageID: string | undefined = result
+        .$('div[id=select-lang]')
+        .find('select')
+        .find(option)
+        .attr('value');
+      if (languageID === undefined) {
+        return;
+      }
+
+      const submitInfo = {
+        csrf_token: csrfToken,
+        'data.TaskScreenName': taskName,
+        'data.LanguageId': languageID,
+        sourceCode: data,
+      };
+
+      result
+        .$('form[class="form-horizontal form-code-submit"]')
+        .submit(submitInfo)
+        .then((res) => {
+          if (res.error) {
+            console.error(res.error);
+          }
+          vscode.window
+            .showInformationMessage(taskName + ' was submitted!', 'Result')
+            .then(() => {
+              vscode.env.openExternal(
+                vscode.Uri.parse(submitUrl.replace('submit', 'submissions/me'))
+              );
+            });
         });
     });
   });
