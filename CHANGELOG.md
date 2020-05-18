@@ -1,6 +1,8 @@
 # Change Log
 
-## [Unreleased]
+<!-- ## [Unreleased] -->
+
+## 0.1.1
 
 - Fixed an bug in ABC that was held concurrently with ARC
 
