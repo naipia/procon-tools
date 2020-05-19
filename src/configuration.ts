@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as os from 'os';
+import * as fs from 'fs';
 import * as languages from './languages';
 
 export class Configuration {
@@ -11,6 +12,7 @@ export class Configuration {
   build!: string;
   command!: string;
   confirmation!: boolean;
+  template!: string;
   atdocerID!: string;
 
   constructor() {
@@ -41,5 +43,14 @@ export class Configuration {
     this.command = selectedLanguage.command.replace(/%TMP/, os.tmpdir());
     this.atdocerID = selectedLanguage.atdocerID;
     this.confirmation = this.conf.get('pre-submission', true);
+    this.getTemplate(this.conf.get('template', ''));
+  }
+
+  getTemplate(templateFilePath: string): void {
+    templateFilePath = templateFilePath.replace(/^~/, this.homeDir);
+    console.log(templateFilePath);
+    this.template = fs.existsSync(templateFilePath)
+      ? fs.readFileSync(templateFilePath, 'utf8').toString()
+      : '';
   }
 }

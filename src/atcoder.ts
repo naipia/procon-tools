@@ -40,10 +40,10 @@ function mkdir(dir: string): void {
   }
 }
 
-function createSource(filename: string): Promise<void> {
+function createSource(filename: string, data: string): Promise<void> {
   return new Promise((resolve) => {
     if (!fs.existsSync(filename)) {
-      fs.writeFileSync(filename, '');
+      fs.writeFileSync(filename, data);
     }
     exec('code ' + filename, () => {
       resolve();
@@ -133,25 +133,25 @@ export function contestInit(
           if (first === '') {
             first = filename;
           }
-          saveSubmitInfo(taskDir, submitUrl, taskName);
           mkdir(taskDir);
           mkdir(taskDir + '/testcases');
           getTestcases(ATCODER_URL + contestUrl, taskDir);
-          await createSource(filename);
+          await createSource(filename, conf.template);
+          saveSubmitInfo(taskDir, submitUrl, taskName);
         }
       }
-      createSource(first);
+      createSource(first, '');
     });
 
     return contestName;
   } else {
     const taskDir: string = contestDir + task[2];
     const filename: string = taskDir + '/' + leaf + '.' + conf.extension;
-    saveSubmitInfo(taskDir, submitUrl, leaf);
     mkdir(taskDir);
     mkdir(taskDir + '/testcases');
     getTestcases(contestUrlParse.href, taskDir);
-    createSource(filename);
+    createSource(filename, conf.template);
+    saveSubmitInfo(taskDir, submitUrl, leaf);
 
     return contestName + ' ' + task[2];
   }
@@ -213,7 +213,7 @@ export function submit(conf: Configuration, activeFilePath: string): void {
 
   fs.readFile(activeFilePath, 'utf8', (err, data) => {
     if (err) {
-      console.log(err);
+      console.error(err);
     }
     cheerio.fetch(submitUrl, {}).then((result) => {
       const csrfToken: string | undefined = result
@@ -234,7 +234,7 @@ export function submit(conf: Configuration, activeFilePath: string): void {
         .find('select')
         .find(option)
         .attr('value');
-      if (languageID === undefined) {
+      if (!languageID) {
         return;
       }
 
