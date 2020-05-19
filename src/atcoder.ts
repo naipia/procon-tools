@@ -1,12 +1,38 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as url from 'url';
+import * as path from 'path';
 import * as cheerio from 'cheerio-httpcli';
 import { exec } from 'child_process';
 import { Configuration } from './configuration';
 import { LoginInfo } from './login';
 
 const ATCODER_URL = 'https://atcoder.jp';
+
+interface SubmitInfo {
+  submitUrl: string;
+  taskName: string;
+}
+
+function saveSubmitInfo(
+  dir: string,
+  submitUrl: string,
+  taskName: string
+): void {
+  const submitInfo: SubmitInfo = {
+    submitUrl: submitUrl,
+    taskName: taskName,
+  };
+  fs.writeFileSync(dir + '/.submit', JSON.stringify(submitInfo, null));
+}
+
+function getSubmitInfo(activeFilePath: string): SubmitInfo {
+  const submitInfoPath: string = path.dirname(activeFilePath) + '/.submit';
+  const submitInfo: SubmitInfo = fs.existsSync(submitInfoPath)
+    ? JSON.parse(fs.readFileSync(submitInfoPath, 'utf8').toString())
+    : {};
+  return submitInfo;
+}
 
 function mkdir(dir: string): void {
   if (!fs.existsSync(dir)) {
@@ -59,7 +85,7 @@ function getTestcases(taskUrl: string, taskDir: string): void {
 export function contestInit(
   conf: Configuration,
   contestUrlParse: url.UrlWithStringQuery
-): string | null {
+): string | undefined {
   mkdir(conf.proconRoot);
 
   const contestRoot: string = conf.proconRoot + 'atcoder';
@@ -67,21 +93,21 @@ export function contestInit(
 
   const contestPathname: string | null = contestUrlParse.pathname;
   if (!contestPathname) {
-    return null;
+    return undefined;
   }
-
   const contestName = contestPathname.split('/')[2];
-  if (contestName === undefined) {
-    return null;
-  }
-
   const contestDir: string = contestRoot + '/' + contestName + '/';
   mkdir(contestDir);
 
   const leaf: string | undefined = contestPathname.split('/').pop();
   if (leaf === undefined) {
-    return null;
+    return undefined;
   }
+
+  const submitUrl: string = 'https://atcoder.jp/contests/%CONTEST_NAME/submit'.replace(
+    '%CONTEST_NAME',
+    contestName
+  );
 
   const task: RegExpMatchArray | null = leaf.match(/(.+)_(.+)/);
   const taskListUrl: string =
@@ -99,17 +125,18 @@ export function contestInit(
           if (!contestUrl) {
             continue;
           }
-          const taskUrl: string = ATCODER_URL + contestUrl;
+          const taskName: string = contestUrl.split('/').pop() + '';
           const taskDir: string =
             contestDir + alphabet.toString().toLowerCase();
           const filename: string =
-            taskDir + '/' + contestUrl.split('/').pop() + '.' + conf.extension;
+            taskDir + '/' + taskName + '.' + conf.extension;
           if (first === '') {
             first = filename;
           }
+          saveSubmitInfo(taskDir, submitUrl, taskName);
           mkdir(taskDir);
           mkdir(taskDir + '/testcases');
-          getTestcases(taskUrl, taskDir);
+          getTestcases(ATCODER_URL + contestUrl, taskDir);
           await createSource(filename);
         }
       }
@@ -120,6 +147,7 @@ export function contestInit(
   } else {
     const taskDir: string = contestDir + task[2];
     const filename: string = taskDir + '/' + leaf + '.' + conf.extension;
+    saveSubmitInfo(taskDir, submitUrl, leaf);
     mkdir(taskDir);
     mkdir(taskDir + '/testcases');
     getTestcases(contestUrlParse.href, taskDir);
@@ -175,16 +203,14 @@ export async function autologin(loginInfo: LoginInfo): Promise<boolean> {
   return false;
 }
 
-export function submit(
-  activeFilePath: string,
-  contest: string,
-  taskName: string,
-  conf: Configuration
-): void {
-  const submitUrl: string = 'https://atcoder.jp/contests/%CONTEST_NAME/submit'.replace(
-    '%CONTEST_NAME',
-    contest
-  );
+export function submit(conf: Configuration, activeFilePath: string): void {
+  const info: SubmitInfo = getSubmitInfo(activeFilePath);
+  const submitUrl: string = info.submitUrl;
+  if (!submitUrl) {
+    vscode.window.showInformationMessage('Execute "Start contest" command');
+    return;
+  }
+
   fs.readFile(activeFilePath, 'utf8', (err, data) => {
     if (err) {
       console.log(err);
@@ -214,7 +240,7 @@ export function submit(
 
       const submitInfo = {
         csrf_token: csrfToken,
-        'data.TaskScreenName': taskName,
+        'data.TaskScreenName': info.taskName,
         'data.LanguageId': languageID,
         sourceCode: data,
       };
@@ -227,7 +253,7 @@ export function submit(
             console.error(res.error);
           }
           vscode.window
-            .showInformationMessage(taskName + ' was submitted!', 'Result')
+            .showInformationMessage(info.taskName + ' was submitted!', 'Result')
             .then(() => {
               vscode.env.openExternal(
                 vscode.Uri.parse(submitUrl.replace('submit', 'submissions/me'))

@@ -14,7 +14,11 @@ export class Configuration {
   atdocerID!: string;
 
   constructor() {
-    this.homeDir = process.env.HOME ? process.env.HOME : '';
+    if (process.platform === 'win32') {
+      this.homeDir = process.env.USERPROFILE ? process.env.USERPROFILE : '';
+    } else {
+      this.homeDir = process.env.HOME ? process.env.HOME : '';
+    }
     this.update();
   }
 
