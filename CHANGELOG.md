@@ -2,6 +2,9 @@
 
 <!-- ## [Unreleased] -->
 
+- Added Windows10 support
+- Added a feature to use a template
+
 ## 0.1.1
 
 - Fixed an bug in ABC that was held concurrently with ARC
