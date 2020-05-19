@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as url from 'url';
+import * as path from 'path';
 
 import { Configuration } from './configuration';
 import * as atcoder from './atcoder';
@@ -83,14 +84,11 @@ export function activate(context: vscode.ExtensionContext): void {
       if (!activeFilePath) {
         return;
       }
-      const sourceFile: string | undefined = activeFilePath.split('/').pop();
-      if (!sourceFile) {
-        return;
-      }
-
-      const taskDir: string = activeFilePath.replace(sourceFile, '');
+      const sourceFile: string = path.basename(activeFilePath);
+      const taskDir: string = path.dirname(activeFilePath) + '/';
       const testcasesDir: string = taskDir + 'testcases/';
       const buildCommand: string = conf.build.replace('%S', activeFilePath);
+
       const buildStatus: boolean = await build(buildCommand);
       if (!buildStatus) {
         vscode.window.showInformationMessage('Compile Error');
@@ -162,10 +160,7 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
 
-      const fileName: string | undefined = activeFilePath.split('/').pop();
-      if (!fileName) {
-        return;
-      }
+      const fileName: string = path.basename(activeFilePath);
 
       if (conf.confirmation) {
         const submit: string | undefined = await vscode.window.showQuickPick(
