@@ -78,6 +78,11 @@
           "type": "boolean",
           "default": true,
           "description": "Confirm before submitting a code"
+        },
+        "procon-tools.template": {
+          "type": "string",
+          "default": "",
+          "description": "Set a template file path"
         }
       }
     }
