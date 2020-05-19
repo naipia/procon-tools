@@ -91,11 +91,10 @@ export function activate(context: vscode.ExtensionContext): void {
 
       const buildStatus: boolean = await build(buildCommand);
       if (!buildStatus) {
-        vscode.window.showInformationMessage('Compile Error');
         return;
       }
-      const baseCommand: string = conf.command.replace('%S', activeFilePath);
-      await runAllTestcases(testcasesDir, baseCommand);
+      const command: string = conf.command.replace('%S', activeFilePath);
+      await runAllTestcases(testcasesDir, command);
       const results: string[][] = await getResult(testcasesDir);
 
       if (!isPanelAlive) {
@@ -160,13 +159,11 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
 
-      const fileName: string = path.basename(activeFilePath);
-
       if (conf.confirmation) {
         const submit: string | undefined = await vscode.window.showQuickPick(
           ['Yes', 'No'],
           {
-            placeHolder: 'Submit ' + fileName,
+            placeHolder: 'Submit ' + path.basename(activeFilePath),
           }
         );
         if (!submit || submit === 'No') {
@@ -174,15 +171,8 @@ export function activate(context: vscode.ExtensionContext): void {
         }
       }
 
-      const taskName: string | undefined = fileName.split('.')[0];
-      if (!taskName) {
-        return;
-      }
-
-      const contest: string[] = activeFilePath
-        .replace(conf.proconRoot, '')
-        .split('/');
-      if (contest[0] === 'atcoder') {
+      const contest: string = activeFilePath.replace(conf.proconRoot, '');
+      if (contest.match(/atcoder/)) {
         if (!atcoderLogin) {
           const loginInfo: LoginInfo = getLoginInfo('AtCoder', conf.homeDir);
           atcoderLogin = await atcoder.autologin(loginInfo);
@@ -190,7 +180,7 @@ export function activate(context: vscode.ExtensionContext): void {
             return;
           }
         }
-        atcoder.submit(activeFilePath, contest[1], taskName, conf);
+        atcoder.submit(conf, activeFilePath);
       }
     }
   );

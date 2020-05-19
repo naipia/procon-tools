@@ -72,7 +72,6 @@ function runTestcase(
     exec(baseCommand.replace('%IN', input).replace('%OUT', output), (err) => {
       console.log(baseCommand.replace('%IN', input).replace('%OUT', output));
       if (err) {
-        console.error(err);
         resolve('Runtime Error');
       }
       resolve('OK');
@@ -94,8 +93,9 @@ export function runAllTestcases(
       });
       for (let i = 0; i < inFiles.length; i++) {
         const file = inFiles[i];
+        const fileNum = file.split('.')[0];
         const input: string = testcasesDir + file;
-        const output: string = testcasesDir + file.split('.')[0] + '.res.txt';
+        const output: string = testcasesDir + fileNum + '.res.txt';
         const message = await Promise.race([
           timeout(),
           runTestcase(baseCommand, input, output),
@@ -116,7 +116,7 @@ export function build(buildCommand: string): Promise<boolean> {
     }
     exec(buildCommand, (err) => {
       if (err) {
-        console.error(err);
+        vscode.window.showWarningMessage(String(err));
         resolve(false);
       }
       resolve(true);
