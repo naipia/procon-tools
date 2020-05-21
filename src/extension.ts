@@ -103,7 +103,9 @@ export function activate(context: vscode.ExtensionContext): void {
           'panel',
           'Result',
           vscode.ViewColumn.Beside,
-          {}
+          {
+            enableScripts: true,
+          }
         );
         isPanelAlive = true;
       }
