@@ -2,14 +2,18 @@
 
 <!-- ## [Unreleased] -->
 
+## 0.2
+
 - Added Windows10 support
 - Added a feature to use a template
+- Updated display of test execution
+- Fixed bugs in "Start contest" command
 
 ## 0.1.1
 
 - Fixed an bug in ABC that was held concurrently with ARC
 
-## 0.1.0
+## 0.1
 
 - Added auto-login
 - Added a link button to the results page after submission

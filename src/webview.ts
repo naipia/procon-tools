@@ -40,7 +40,8 @@ export async function updateResultWebview(
         .replace('%INPUT', results[i][0])
         .replace('%EXPECT', results[i][1])
         .replace('%RESULT', results[i][2])
-        .replace(/%STATUS/g, results[i][3]) + '\n';
+        .replace(/%STATUS/g, results[i][3])
+        .replace(/%IID/g, 'input' + String(i + 1)) + '\n';
   }
   panel.webview.html = resultDoc
     .replace('%TITLE', sourceFile.split('.')[0].replace('_', ' ').toUpperCase())

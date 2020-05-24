@@ -55,6 +55,7 @@ export function getResult(testcasesDir: string): Promise<string[][]> {
         await Promise.all([input, expectOutput, resultOutput, result]).then(
           (arr) => {
             results.push(arr);
+            fs.unlinkSync(resFilePath);
           }
         );
       }
@@ -67,14 +68,14 @@ function runTestcase(
   baseCommand: string,
   input: string,
   output: string
-): Promise<string> {
+): Promise<boolean> {
   return new Promise((resolve) => {
     exec(baseCommand.replace('%IN', input).replace('%OUT', output), (err) => {
-      console.log(baseCommand.replace('%IN', input).replace('%OUT', output));
       if (err) {
-        resolve('Runtime Error');
+        vscode.window.showWarningMessage(String(err));
+        resolve(false);
       }
-      resolve('OK');
+      resolve(true);
     });
   });
 }
@@ -96,12 +97,12 @@ export function runAllTestcases(
         const fileNum = file.split('.')[0];
         const input: string = testcasesDir + file;
         const output: string = testcasesDir + fileNum + '.res.txt';
-        const message = await Promise.race([
+        const status = await Promise.race([
           timeout(),
           runTestcase(baseCommand, input, output),
         ]);
-        if (message !== 'OK') {
-          vscode.window.showInformationMessage(message);
+        if (!status) {
+          vscode.window.showInformationMessage('Runtime Error');
         }
       }
       resolve();

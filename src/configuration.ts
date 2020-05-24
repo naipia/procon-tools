@@ -48,7 +48,6 @@ export class Configuration {
 
   getTemplate(templateFilePath: string): void {
     templateFilePath = templateFilePath.replace(/^~/, this.homeDir);
-    console.log(templateFilePath);
     this.template = fs.existsSync(templateFilePath)
       ? fs.readFileSync(templateFilePath, 'utf8').toString()
       : '';

@@ -53,7 +53,6 @@ function createSource(filename: string, data: string): Promise<void> {
 
 function getTestcases(taskUrl: string, taskDir: string): void {
   cheerio.fetch(taskUrl, {}).then((result) => {
-    console.log(result.$('title').text());
     let num = 1;
     result.$('section').each((i, elem) => {
       const text1 = result.$(elem).find('h3').text();
@@ -63,7 +62,7 @@ function getTestcases(taskUrl: string, taskDir: string): void {
           taskDir + '/testcases/' + Math.floor((num + 1) / 2) + '.in.txt';
         fs.writeFile(filename, text2, (err) => {
           if (err) {
-            console.log(err);
+            console.error(err);
           }
         });
         num++;
@@ -73,7 +72,7 @@ function getTestcases(taskUrl: string, taskDir: string): void {
           taskDir + '/testcases/' + Math.floor((num + 1) / 2) + '.out.txt';
         fs.writeFile(filename, text2, (err) => {
           if (err) {
-            console.log(err);
+            console.error(err);
           }
         });
         num++;
@@ -95,66 +94,65 @@ export function contestInit(
   if (!contestPathname) {
     return undefined;
   }
-  const contestName = contestPathname.split('/')[2];
-  const contestDir: string = contestRoot + '/' + contestName + '/';
-  mkdir(contestDir);
-
-  const leaf: string | undefined = contestPathname.split('/').pop();
-  if (leaf === undefined) {
+  const contestUrlInfo: string[] = contestPathname.split('/');
+  if (contestUrlInfo.slice(-1)[0] === '') {
+    contestUrlInfo.pop();
+  }
+  if (
+    contestUrlInfo.length < 3 ||
+    contestUrlInfo.length > 5 ||
+    (contestUrlInfo.length >= 4 && contestUrlInfo[3] !== 'tasks') ||
+    contestUrlInfo[1] !== 'contests'
+  ) {
     return undefined;
   }
 
+  const contestName = contestUrlInfo[2];
+  const contestDir: string = contestRoot + '/' + contestName + '/';
+  mkdir(contestDir);
+
+  const leaf: string =
+    contestUrlInfo.length === 5 ? contestUrlInfo.slice(-1)[0] : '';
   const submitUrl: string = 'https://atcoder.jp/contests/%CONTEST_NAME/submit'.replace(
     '%CONTEST_NAME',
     contestName
   );
 
-  const task: RegExpMatchArray | null = leaf.match(/(.+)_(.+)/);
   const taskListUrl: string =
     ATCODER_URL + '/contests/' + contestName + '/tasks';
-  if (!task || task[1] !== contestName) {
-    cheerio.fetch(taskListUrl, {}).then(async (result) => {
-      const elements = result.$('tbody').find('td').find('a');
-      let first = '';
-      for (let i = 0; i < elements.length; i++) {
-        const alphabet = result.$(elements[i]).text();
-        if (alphabet.match(/^[A-Z]{1}[1-9]*$/)) {
-          const contestUrl: string | undefined = result
-            .$(elements[i])
-            .attr('href');
-          if (!contestUrl) {
-            continue;
-          }
-          const taskName: string = contestUrl.split('/').pop() + '';
-          const taskDir: string =
-            contestDir + alphabet.toString().toLowerCase();
-          const filename: string =
-            taskDir + '/' + taskName + '.' + conf.extension;
-          if (first === '') {
-            first = filename;
-          }
-          mkdir(taskDir);
-          mkdir(taskDir + '/testcases');
-          getTestcases(ATCODER_URL + contestUrl, taskDir);
-          await createSource(filename, conf.template);
-          saveSubmitInfo(taskDir, submitUrl, taskName);
+  cheerio.fetch(taskListUrl, {}).then(async (result) => {
+    const elements = result.$('tbody').find('td').find('a');
+    let files: string[] = [];
+    for (let i = 0; i < elements.length; i++) {
+      const alphabet = result.$(elements[i]).text().toLowerCase();
+      if (alphabet.match(/^[a-z]{1}[1-9]*$/)) {
+        const contestUrl: string | undefined = result
+          .$(elements[i])
+          .attr('href');
+        if (!contestUrl) {
+          continue;
         }
+        const taskName: string = contestUrl.split('/').pop() + '';
+        if (leaf !== '' && taskName !== leaf) {
+          continue;
+        }
+        const taskDir: string = contestDir + alphabet;
+        const filename: string =
+          taskDir + '/' + contestName + '_' + alphabet + '.' + conf.extension;
+        files.push(filename);
+        mkdir(taskDir);
+        mkdir(taskDir + '/testcases');
+        getTestcases(ATCODER_URL + contestUrl, taskDir);
+        await createSource(filename, conf.template);
+        saveSubmitInfo(taskDir, submitUrl, taskName);
       }
-      createSource(first, '');
-    });
-
-    return contestName;
-  } else {
-    const taskDir: string = contestDir + task[2];
-    const filename: string = taskDir + '/' + leaf + '.' + conf.extension;
-    mkdir(taskDir);
-    mkdir(taskDir + '/testcases');
-    getTestcases(contestUrlParse.href, taskDir);
-    createSource(filename, conf.template);
-    saveSubmitInfo(taskDir, submitUrl, leaf);
-
-    return contestName + ' ' + task[2];
-  }
+    }
+    files = files.reverse();
+    for (let i = 0; i < files.length; i++) {
+      await createSource(files[i], '');
+    }
+  });
+  return contestName;
 }
 
 export function login(loginInfo: LoginInfo): Promise<boolean> {

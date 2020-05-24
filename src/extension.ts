@@ -91,6 +91,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
       const buildStatus: boolean = await build(buildCommand);
       if (!buildStatus) {
+        vscode.window.showInformationMessage('Compile Error');
         return;
       }
       const command: string = conf.command.replace('%S', activeFilePath);
@@ -102,12 +103,15 @@ export function activate(context: vscode.ExtensionContext): void {
           'panel',
           'Result',
           vscode.ViewColumn.Beside,
-          {}
+          {
+            enableScripts: true,
+          }
         );
         isPanelAlive = true;
       }
 
       updateResultWebview(context, panel, sourceFile, results);
+      vscode.window.showInformationMessage('All tests have been completed!');
 
       panel.onDidDispose(() => {
         isPanelAlive = false;
