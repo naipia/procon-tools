@@ -71,7 +71,6 @@ function runTestcase(
 ): Promise<boolean> {
   return new Promise((resolve) => {
     exec(baseCommand.replace('%IN', input).replace('%OUT', output), (err) => {
-      console.log(baseCommand.replace('%IN', input).replace('%OUT', output));
       if (err) {
         vscode.window.showWarningMessage(String(err));
         resolve(false);

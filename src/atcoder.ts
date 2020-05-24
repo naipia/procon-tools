@@ -53,7 +53,6 @@ function createSource(filename: string, data: string): Promise<void> {
 
 function getTestcases(taskUrl: string, taskDir: string): void {
   cheerio.fetch(taskUrl, {}).then((result) => {
-    console.log(result.$('title').text());
     let num = 1;
     result.$('section').each((i, elem) => {
       const text1 = result.$(elem).find('h3').text();
@@ -63,7 +62,7 @@ function getTestcases(taskUrl: string, taskDir: string): void {
           taskDir + '/testcases/' + Math.floor((num + 1) / 2) + '.in.txt';
         fs.writeFile(filename, text2, (err) => {
           if (err) {
-            console.log(err);
+            console.error(err);
           }
         });
         num++;
@@ -73,7 +72,7 @@ function getTestcases(taskUrl: string, taskDir: string): void {
           taskDir + '/testcases/' + Math.floor((num + 1) / 2) + '.out.txt';
         fs.writeFile(filename, text2, (err) => {
           if (err) {
-            console.log(err);
+            console.error(err);
           }
         });
         num++;
