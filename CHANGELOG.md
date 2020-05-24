@@ -6,7 +6,7 @@
 
 - Added Windows10 support
 - Added a feature to use a template
-- Update display of test execution
+- Updated display of test execution
 - Fixed bugs in "Start contest" command
 
 ## 0.1.1
