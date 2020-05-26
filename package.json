@@ -74,6 +74,11 @@
           "default": "C++",
           "description": "Set a language of automatically generated source files"
         },
+        "procon-tools.options": {
+          "type": "string",
+          "default": "",
+          "description": "Set compiler Options(Space-delimited)"
+        },
         "procon-tools.pre-submission": {
           "type": "boolean",
           "default": true,

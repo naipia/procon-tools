@@ -39,7 +39,10 @@ export class Configuration {
     this.language = this.conf.get('language', 'C++');
     const selectedLanguage = languages.getLanguage(this.language);
     this.extension = selectedLanguage.extension;
-    this.build = selectedLanguage.build.replace(/%TMP/, os.tmpdir());
+    const buildOptions = this.conf.get('options', '');
+    this.build = selectedLanguage.build
+      .replace(/%TMP/, os.tmpdir())
+      .replace('%OPTIONS', buildOptions);
     this.command = selectedLanguage.command.replace(/%TMP/, os.tmpdir());
     this.atdocerID = selectedLanguage.atdocerID;
     this.confirmation = this.conf.get('pre-submission', true);
