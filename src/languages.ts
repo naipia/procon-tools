@@ -7,14 +7,14 @@ interface Language {
 
 const cPlusPlus: Language = {
   extension: 'cpp',
-  build: 'g++ -o %TMP/main %S',
+  build: 'g++ -o %TMP/main %OPTIONS %S',
   command: '%TMP/main < %IN > %OUT',
   atdocerID: 'text/x-c++src',
 };
 
 const go: Language = {
   extension: 'go',
-  build: 'go build -o %TMP/main %S',
+  build: 'go build -o %TMP/main %OPTIONS %S',
   command: '%TMP/main < %IN > %OUT',
   atdocerID: 'text/x-go',
 };

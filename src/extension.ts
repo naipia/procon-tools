@@ -4,7 +4,7 @@ import * as path from 'path';
 
 import { Configuration } from './configuration';
 import * as atcoder from './atcoder';
-import { updateResultWebview } from './webview';
+import * as webview from './webview';
 import { runAllTestcases, getResult, build } from './run';
 import { LoginInfo, saveLoginInfo, getLoginInfo } from './login';
 
@@ -89,15 +89,6 @@ export function activate(context: vscode.ExtensionContext): void {
       const testcasesDir: string = taskDir + 'testcases/';
       const buildCommand: string = conf.build.replace('%S', activeFilePath);
 
-      const buildStatus: boolean = await build(buildCommand);
-      if (!buildStatus) {
-        vscode.window.showInformationMessage('Compile Error');
-        return;
-      }
-      const command: string = conf.command.replace('%S', activeFilePath);
-      await runAllTestcases(testcasesDir, command);
-      const results: string[][] = await getResult(testcasesDir);
-
       if (!isPanelAlive) {
         panel = vscode.window.createWebviewPanel(
           'panel',
@@ -110,7 +101,18 @@ export function activate(context: vscode.ExtensionContext): void {
         isPanelAlive = true;
       }
 
-      updateResultWebview(context, panel, sourceFile, results);
+      const message: string | null = await build(buildCommand);
+      if (message) {
+        webview.updateCompilationError(context, panel, sourceFile, message);
+        vscode.window.showInformationMessage('Compilation Error');
+        return;
+      }
+
+      const command: string = conf.command.replace('%S', activeFilePath);
+      await runAllTestcases(testcasesDir, command);
+      const results: string[][] = await getResult(testcasesDir);
+
+      webview.updateResults(context, panel, sourceFile, results);
       vscode.window.showInformationMessage('All tests have been completed!');
 
       panel.onDidDispose(() => {

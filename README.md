@@ -31,9 +31,3 @@ Give the following commands to the VSCode command palette:
 
 - `C++`
 - `Go`
-
-## Extension Settings
-
-- `procon-tools.home`: Set a working directory path for contests. The default is `~/contests`
-- `procon-tools.language`: Set a language of automatically generated source files. The default is C++
-- `procon-tools.pre-submission`: Confirm before submitting a code

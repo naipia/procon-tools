@@ -110,17 +110,16 @@ export function runAllTestcases(
   });
 }
 
-export function build(buildCommand: string): Promise<boolean> {
+export function build(buildCommand: string): Promise<string | null> {
   return new Promise((resolve) => {
     if (buildCommand === '') {
-      resolve(true);
+      resolve(null);
     }
     exec(buildCommand, (err) => {
       if (err) {
-        vscode.window.showWarningMessage(String(err));
-        resolve(false);
+        resolve(String(err));
       }
-      resolve(true);
+      resolve(null);
     });
   });
 }

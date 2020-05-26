@@ -2,6 +2,11 @@
 
 <!-- ## [Unreleased] -->
 
+## 0.3
+
+- Added display of compile error
+- Added a setting of compile options
+
 ## 0.2
 
 - Added Windows10 support

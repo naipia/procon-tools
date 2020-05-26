@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
-function getResultHTML(context: vscode.ExtensionContext): Promise<string> {
+function getMainHTML(context: vscode.ExtensionContext): Promise<string> {
   return new Promise((resolve) => {
     const filename: string = context.extensionPath + '/html/result.html';
     fs.readFile(filename, 'utf8', (err, data) => {
@@ -25,13 +25,28 @@ function getCaseHTML(context: vscode.ExtensionContext): Promise<string> {
   });
 }
 
-export async function updateResultWebview(
+function getCompilationErrorHTML(
+  context: vscode.ExtensionContext
+): Promise<string> {
+  return new Promise((resolve) => {
+    const filename: string =
+      context.extensionPath + '/html/compilation_error.html';
+    fs.readFile(filename, 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+      }
+      resolve(data);
+    });
+  });
+}
+
+export async function updateResults(
   context: vscode.ExtensionContext,
   panel: vscode.WebviewPanel,
   sourceFile: string,
   results: string[][]
 ): Promise<void> {
-  const resultDoc: string = await getResultHTML(context);
+  const mainDoc: string = await getMainHTML(context);
   const caseDoc: string = await getCaseHTML(context);
   let cases = '';
   for (let i = 0; i < results.length; i++) {
@@ -43,7 +58,20 @@ export async function updateResultWebview(
         .replace(/%STATUS/g, results[i][3])
         .replace(/%IID/g, 'input' + String(i + 1)) + '\n';
   }
-  panel.webview.html = resultDoc
+  panel.webview.html = mainDoc
     .replace('%TITLE', sourceFile.split('.')[0].replace('_', ' ').toUpperCase())
     .replace('%CASE', cases);
+}
+
+export async function updateCompilationError(
+  context: vscode.ExtensionContext,
+  panel: vscode.WebviewPanel,
+  sourceFile: string,
+  message: string
+): Promise<void> {
+  const mainDoc: string = await getMainHTML(context);
+  const errDoc: string = await getCompilationErrorHTML(context);
+  panel.webview.html = mainDoc
+    .replace('%TITLE', sourceFile.split('.')[0].replace('_', ' ').toUpperCase())
+    .replace('%CASE', errDoc.replace('%MESSAGE', message));
 }
