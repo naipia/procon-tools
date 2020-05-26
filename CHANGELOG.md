@@ -2,6 +2,8 @@
 
 <!-- ## [Unreleased] -->
 
+## 0.3
+
 - Added display of compile error
 - Added a setting of compile options
 
