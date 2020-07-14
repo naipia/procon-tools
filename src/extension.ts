@@ -70,7 +70,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const cmd2 = vscode.commands.registerCommand(
     'procon-tools.test',
     async () => {
-      const activeFilePath: string | undefined = getActiveFilePath();
+      const activeFilePath: string | undefined = getActiveFilePath(conf);
       if (!activeFilePath) {
         return;
       }
@@ -150,7 +150,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const cmd4 = vscode.commands.registerCommand(
     'procon-tools.submit',
     async () => {
-      const activeFilePath: string | undefined = getActiveFilePath();
+      const activeFilePath: string | undefined = getActiveFilePath(conf);
       if (!activeFilePath) {
         return;
       }
@@ -184,7 +184,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const cmd5 = vscode.commands.registerCommand(
     'procon-tools.custom-test',
     async () => {
-      const activeFilePath: string | undefined = getActiveFilePath();
+      const activeFilePath: string | undefined = getActiveFilePath(conf);
       if (!activeFilePath) {
         return;
       }
