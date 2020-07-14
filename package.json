@@ -13,7 +13,8 @@
     "onCommand:procon-tools.contest",
     "onCommand:procon-tools.login",
     "onCommand:procon-tools.test",
-    "onCommand:procon-tools.submit"
+    "onCommand:procon-tools.submit",
+    "onCommand:procon-tools.custom-test"
   ],
   "publisher": "naipia",
   "main": "./out/extension.js",
@@ -35,6 +36,10 @@
       {
         "command": "procon-tools.submit",
         "title": "Procon: Submit code"
+      },
+      {
+        "command": "procon-tools.custom-test",
+        "title": "Procon: Custom test"
       }
     ],
     "menus": {

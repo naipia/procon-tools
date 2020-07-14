@@ -1,17 +1,20 @@
 import * as vscode from 'vscode';
 import * as url from 'url';
 import * as path from 'path';
+import * as fs from 'fs';
+import * as os from 'os';
 
 import { Configuration } from './configuration';
 import * as atcoder from './atcoder';
 import * as webview from './webview';
-import { runAllTestcases, getResult, build } from './run';
+import { runAllTestcases, getResult, build, runCustom } from './run';
 import { LoginInfo, saveLoginInfo, getLoginInfo } from './login';
+import { getActiveFilePath } from './util';
 
 const REGEX_URL = /^https?:\/\//;
 
 const conf = new Configuration();
-let atcoderLogin = false;
+export let atcoderLogin = false;
 
 async function contestController(inputUrl: string): Promise<void> {
   const contestUrlParse: url.UrlWithStringQuery = url.parse(inputUrl);
@@ -39,19 +42,6 @@ async function contestController(inputUrl: string): Promise<void> {
       '"';
   }
   vscode.window.showInformationMessage(message);
-}
-
-function getActiveFilePath(): string | undefined {
-  const editor = vscode.window.activeTextEditor;
-  if (!editor) {
-    return undefined;
-  }
-
-  const activeFilePath: string = editor.document.fileName;
-  if (activeFilePath.split('.').pop() !== conf.extension) {
-    return undefined;
-  }
-  return activeFilePath;
 }
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -191,6 +181,60 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
 
+  const cmd5 = vscode.commands.registerCommand(
+    'procon-tools.custom-test',
+    async () => {
+      const activeFilePath: string | undefined = getActiveFilePath();
+      if (!activeFilePath) {
+        return;
+      }
+      const sourceFile: string = path.basename(activeFilePath);
+
+      if (!isPanelAlive) {
+        panel = vscode.window.createWebviewPanel(
+          'panel',
+          'Result',
+          vscode.ViewColumn.Beside,
+          {
+            enableScripts: true,
+          }
+        );
+        isPanelAlive = true;
+      }
+
+      const data: string = await conf.getCustomTestHTML(context);
+      const customObj = {
+        source: activeFilePath,
+        filename: sourceFile,
+        stdin: '',
+      };
+      webview.updateCustomTest(panel, data, customObj, ['', '']);
+
+      panel.onDidDispose(() => {
+        isPanelAlive = false;
+      });
+
+      panel.webview.onDidReceiveMessage(async (obj) => {
+        const customObj = {
+          source: obj.source,
+          filename: obj.filename,
+          stdin: obj.stdin,
+        };
+        const data: string = await conf.getCustomTestHTML(context);
+        const message: string | null = await build(
+          conf.getBuildCommand(obj.source)
+        );
+        if (message) {
+          webview.updateCustomTest(panel, data, customObj, ['', message]);
+          return;
+        }
+        fs.writeFileSync(os.tmpdir() + '/in.txt', obj.stdin);
+        const out: string[] = await runCustom(conf);
+        webview.updateCustomTest(panel, data, customObj, out);
+      });
+    }
+  );
+
   vscode.workspace.onDidChangeConfiguration(() => {
     conf.update();
   });
@@ -199,6 +243,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(cmd2);
   context.subscriptions.push(cmd3);
   context.subscriptions.push(cmd4);
+  context.subscriptions.push(cmd5);
 }
 
 export function deactivate(): void {

@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { exec } from 'child_process';
+import * as os from 'os';
+
+import { Configuration } from './configuration';
 
 async function timeout(): Promise<string> {
   return new Promise((resolve) => {
@@ -117,9 +120,24 @@ export function build(buildCommand: string): Promise<string | null> {
     }
     exec(buildCommand, (err) => {
       if (err) {
+        vscode.window.showInformationMessage('Compilation Error');
         resolve(String(err));
       }
       resolve(null);
     });
+  });
+}
+
+export function runCustom(conf: Configuration): Promise<string[]> {
+  return new Promise((resolve) => {
+    exec(
+      conf.command.replace('%IN > %OUT', os.tmpdir() + '/in.txt'),
+      (err, stdout, stderr) => {
+        if (err) {
+          resolve(['', String(err)]);
+        }
+        resolve([stdout, stderr]);
+      }
+    );
   });
 }

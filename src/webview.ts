@@ -75,3 +75,23 @@ export async function updateCompilationError(
     .replace('%TITLE', sourceFile.split('.')[0].replace('_', ' ').toUpperCase())
     .replace('%CASE', errDoc.replace('%MESSAGE', message));
 }
+
+interface CustomTestObj {
+  source: string;
+  filename: string;
+  stdin: string;
+}
+
+export function updateCustomTest(
+  panel: vscode.WebviewPanel,
+  data: string,
+  obj: CustomTestObj,
+  out: string[]
+): void {
+  panel.webview.html = data
+    .replace('%SOURCE_PATH', obj.source)
+    .replace(/%FILENAME/g, obj.filename)
+    .replace('%STDIN', obj.stdin)
+    .replace('%STDOUT', out[0])
+    .replace('%STDERR', out[1]);
+}
