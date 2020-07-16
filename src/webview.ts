@@ -93,5 +93,6 @@ export function updateCustomTest(
     .replace(/%FILENAME/g, obj.filename)
     .replace('%STDIN', obj.stdin)
     .replace('%STDOUT', out[0])
-    .replace('%STDERR', out[1]);
+    .replace('%STDERR', out[1])
+    .replace('%EXECTIME', out[2]);
 }

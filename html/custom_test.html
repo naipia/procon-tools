@@ -52,11 +52,13 @@
   <h3>%FILENAME</h3>
 
   <h3>Input</h3>
-  <form name="frm"><textarea class="input" name="stdin" rows="5">%STDIN</textarea></form>
+  <form name="frm"><textarea class="input" name="stdin" rows="5" autofocus>%STDIN</textarea></form>
   <button class="btn" onclick="exec()">execute</button>
 
+  <h3>Exec Time: %EXECTIME</h3>
+
   <h3>Standard Output</h3>
-  <pre id="stdout" r>%STDOUT</pre>
+  <pre id="stdout">%STDOUT</pre>
 
   <h3>Standard Error</h3>
   <pre id="stderr">%STDERR</pre>

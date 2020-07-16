@@ -1,9 +1,8 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { exec } from 'child_process';
-import * as os from 'os';
-
-import { Configuration } from './configuration';
+import * as kill from 'tree-kill';
+import { performance } from 'perf_hooks';
 
 async function timeout(): Promise<string> {
   return new Promise((resolve) => {
@@ -128,16 +127,23 @@ export function build(buildCommand: string): Promise<string | null> {
   });
 }
 
-export function runCustom(conf: Configuration): Promise<string[]> {
+export function execute(command: string, stdin: string): Promise<string[]> {
   return new Promise((resolve) => {
-    exec(
-      conf.command.replace('%IN > %OUT', os.tmpdir() + '/in.txt'),
-      (err, stdout, stderr) => {
-        if (err) {
-          resolve(['', String(err)]);
-        }
-        resolve([stdout, stderr]);
+    const start = performance.now();
+    const process = exec(command, (err, stdout, stderr) => {
+      const time: string =
+        String((performance.now() - start).toFixed(0)) + ' ms';
+      if (err) {
+        resolve(['', String(err), time]);
       }
-    );
+      resolve([stdout, stderr, time]);
+    });
+    process.stdin?.write(stdin);
+    process.stdin?.end();
+    setTimeout(() => {
+      console.log(process);
+      kill(process.pid);
+      resolve(['', '', 'Timeout']);
+    }, 3000);
   });
 }

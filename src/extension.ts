@@ -3,11 +3,10 @@ import * as url from 'url';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-
 import { Configuration } from './configuration';
 import * as atcoder from './atcoder';
 import * as webview from './webview';
-import { runAllTestcases, getResult, build, runCustom } from './run';
+import { runAllTestcases, getResult, build, execute } from './run';
 import { LoginInfo, saveLoginInfo, getLoginInfo } from './login';
 import { getActiveFilePath } from './util';
 
@@ -82,7 +81,7 @@ export function activate(context: vscode.ExtensionContext): void {
       if (!isPanelAlive) {
         panel = vscode.window.createWebviewPanel(
           'panel',
-          'Result',
+          'Procon-tools',
           vscode.ViewColumn.Beside,
           {
             enableScripts: true,
@@ -190,17 +189,18 @@ export function activate(context: vscode.ExtensionContext): void {
       }
       const sourceFile: string = path.basename(activeFilePath);
 
-      if (!isPanelAlive) {
-        panel = vscode.window.createWebviewPanel(
-          'panel',
-          'Result',
-          vscode.ViewColumn.Beside,
-          {
-            enableScripts: true,
-          }
-        );
-        isPanelAlive = true;
+      if (isPanelAlive) {
+        panel.dispose();
       }
+      isPanelAlive = true;
+      panel = vscode.window.createWebviewPanel(
+        'panel',
+        'Procon-tools',
+        vscode.ViewColumn.Beside,
+        {
+          enableScripts: true,
+        }
+      );
 
       const data: string = await conf.getCustomTestHTML(context);
       const customObj = {
@@ -208,7 +208,7 @@ export function activate(context: vscode.ExtensionContext): void {
         filename: sourceFile,
         stdin: '',
       };
-      webview.updateCustomTest(panel, data, customObj, ['', '']);
+      webview.updateCustomTest(panel, data, customObj, ['', '', '']);
 
       panel.onDidDispose(() => {
         isPanelAlive = false;
@@ -225,11 +225,13 @@ export function activate(context: vscode.ExtensionContext): void {
           conf.getBuildCommand(obj.source)
         );
         if (message) {
-          webview.updateCustomTest(panel, data, customObj, ['', message]);
+          webview.updateCustomTest(panel, data, customObj, ['', message, '']);
           return;
         }
-        fs.writeFileSync(os.tmpdir() + '/in.txt', obj.stdin);
-        const out: string[] = await runCustom(conf);
+        const out: string[] = await execute(
+          conf.command.replace('< %IN > %OUT', ''),
+          obj.stdin
+        );
         webview.updateCustomTest(panel, data, customObj, out);
       });
     }

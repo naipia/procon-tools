@@ -51,7 +51,7 @@
         }
       ]
     },
-    "keybindings":[
+    "keybindings": [
       {
         "command": "procon-tools.test",
         "key": "alt+enter"
@@ -128,6 +128,7 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "cheerio-httpcli": "^0.7.4"
+    "cheerio-httpcli": "^0.7.4",
+    "tree-kill": "^1.2.2"
   }
 }
