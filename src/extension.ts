@@ -1,16 +1,12 @@
 import * as vscode from 'vscode';
 import * as url from 'url';
 import * as path from 'path';
-import * as fs from 'fs';
-import * as os from 'os';
 import { Configuration } from './configuration';
 import * as atcoder from './atcoder';
 import * as webview from './webview';
-import { runAllTestcases, getResult, build, execute } from './run';
+import { runAllTestcases, build, execute } from './run';
 import { LoginInfo, saveLoginInfo, getLoginInfo } from './login';
 import { getActiveFilePath } from './util';
-
-const REGEX_URL = /^https?:\/\//;
 
 const conf = new Configuration();
 export let atcoderLogin = false;
@@ -54,7 +50,7 @@ export function activate(context: vscode.ExtensionContext): void {
         prompt: 'Get ready for a contest.',
         placeHolder: 'Enter a contest URL',
         validateInput: (param) => {
-          return REGEX_URL.test(param) ? '' : 'Please enter the URL';
+          return /^https?:\/\//.test(param) ? '' : 'Please enter the URL';
         },
       })
       .then((inputUrl) => {
@@ -90,18 +86,19 @@ export function activate(context: vscode.ExtensionContext): void {
         isPanelAlive = true;
       }
 
-      const message: string | null = await build(buildCommand);
-      if (message) {
-        webview.updateCompilationError(context, panel, sourceFile, message);
+      const error: string | null = await build(buildCommand);
+      if (error) {
+        webview.updateCompilationError(context, panel, sourceFile, error);
         vscode.window.showInformationMessage('Compilation Error');
         return;
       }
 
-      const command: string = conf.command.replace('%S', activeFilePath);
-      await runAllTestcases(testcasesDir, command);
-      const results: string[][] = await getResult(testcasesDir);
+      const executions: Execution[] = await runAllTestcases(
+        testcasesDir,
+        conf.command
+      );
 
-      webview.updateResults(context, panel, sourceFile, results);
+      webview.updateResults(context, panel, sourceFile, executions);
       vscode.window.showInformationMessage('All tests have been completed!');
 
       panel.onDidDispose(() => {
@@ -203,36 +200,40 @@ export function activate(context: vscode.ExtensionContext): void {
       );
 
       const data: string = await conf.getCustomTestHTML(context);
-      const customObj = {
+      const customObj: SourceFileObj = {
         source: activeFilePath,
         filename: sourceFile,
-        stdin: '',
       };
-      webview.updateCustomTest(panel, data, customObj, ['', '', '']);
+      webview.updateCustomTest(panel, data, customObj);
 
       panel.onDidDispose(() => {
         isPanelAlive = false;
       });
 
       panel.webview.onDidReceiveMessage(async (obj) => {
-        const customObj = {
+        const customObj: SourceFileObj = {
           source: obj.source,
           filename: obj.filename,
-          stdin: obj.stdin,
+        };
+        let execution: Execution = {
+          stdin: '',
+          expect: '',
+          stdout: '',
+          stderr: '',
+          time: '',
+          status: '',
         };
         const data: string = await conf.getCustomTestHTML(context);
-        const message: string | null = await build(
+        const error: string | null = await build(
           conf.getBuildCommand(obj.source)
         );
-        if (message) {
-          webview.updateCustomTest(panel, data, customObj, ['', message, '']);
+        if (error) {
+          execution.stderr = error;
+          webview.updateCustomTest(panel, data, customObj, execution);
           return;
         }
-        const out: string[] = await execute(
-          conf.command.replace('< %IN > %OUT', ''),
-          obj.stdin
-        );
-        webview.updateCustomTest(panel, data, customObj, out);
+        execution = await execute(conf.command, obj.stdin);
+        webview.updateCustomTest(panel, data, customObj, execution);
       });
     }
   );

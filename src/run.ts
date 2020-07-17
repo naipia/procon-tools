@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
 import * as fs from 'fs';
+import * as os from 'os';
 import { exec } from 'child_process';
 import * as kill from 'tree-kill';
 import { performance } from 'perf_hooks';
@@ -30,32 +30,6 @@ function readFile(filePath: string): Promise<string> {
   });
 }
 
-export function getResult(testcasesDir: string): Promise<string[][]> {
-  return new Promise((resolve) => {
-    fs.readdir(testcasesDir, async (err, files) => {
-      const resFiles: string[] = files.filter((file) => {
-        return /.*\.res.txt$/.test(file);
-      });
-      const results: string[][] = [];
-      for (let i = 0; i < resFiles.length; i++) {
-        const resFilePath: string = testcasesDir + resFiles[i];
-        const inFilePath: string = resFilePath.replace(/.res./, '.in.');
-        const outFilePath: string = resFilePath.replace(/.res./, '.out.');
-        const result = verify(resFilePath, outFilePath);
-        const stdin = readFile(inFilePath);
-        const expectOut = readFile(outFilePath);
-        const resultOut = readFile(resFilePath);
-
-        await Promise.all([stdin, expectOut, resultOut, result]).then((arr) => {
-          results.push(arr);
-          fs.unlinkSync(resFilePath);
-        });
-      }
-      resolve(results);
-    });
-  });
-}
-
 export function build(buildCommand: string): Promise<string | null> {
   return new Promise((resolve) => {
     if (buildCommand === '') {
@@ -63,7 +37,6 @@ export function build(buildCommand: string): Promise<string | null> {
     }
     exec(buildCommand, (err) => {
       if (err) {
-        vscode.window.showInformationMessage('Compilation Error');
         resolve(String(err));
       }
       resolve(null);
@@ -71,22 +44,31 @@ export function build(buildCommand: string): Promise<string | null> {
   });
 }
 
-export function execute(command: string, stdin: string): Promise<string[]> {
+export function execute(command: string, stdin: string): Promise<Execution> {
   return new Promise((resolve) => {
+    const execution: Execution = {
+      stdin: stdin,
+      expect: '',
+      stdout: '',
+      stderr: '',
+      time: '',
+      status: 'WJ',
+    };
     const start = performance.now();
     const process = exec(command, (err, stdout, stderr) => {
-      const time: string =
-        String((performance.now() - start).toFixed(0)) + ' ms';
+      execution.time = String((performance.now() - start).toFixed(0)) + ' ms';
+      execution.stdout = stdout;
+      execution.stderr = stderr;
       if (err) {
-        resolve(['', String(err), time]);
+        execution.stderr += String(err);
       }
-      resolve([stdout, stderr, time]);
+      resolve(execution);
     });
     process.stdin?.write(stdin);
     process.stdin?.end();
     setTimeout(() => {
       kill(process.pid);
-      resolve(['', '', 'Timeout']);
+      resolve(execution);
     }, 3000);
   });
 }
@@ -94,22 +76,29 @@ export function execute(command: string, stdin: string): Promise<string[]> {
 export function runAllTestcases(
   testcasesDir: string,
   command: string
-): Promise<void> {
+): Promise<Execution[]> {
   return new Promise((resolve) => {
     fs.readdir(testcasesDir, async (err, files) => {
       if (err) {
         console.error(err);
       }
+      const executions: Execution[] = [];
       const inFiles: string[] = files.filter((file) => {
-        return /.*\.in.txt$/.test(file);
+        return /.*\.in\.txt$/.test(file);
       });
       for (let i = 0; i < inFiles.length; i++) {
         const fileNum = inFiles[i].split('.')[0];
         const stdin: string = await readFile(testcasesDir + inFiles[i]);
-        const out: string[] = await execute(command, stdin);
-        fs.writeFileSync(testcasesDir + fileNum + '.res.txt', out[0]);
+        const execution: Execution = await execute(command, stdin);
+        const resFilePath: string = os.tmpdir() + '/' + fileNum + '.res.txt';
+        const outFilePath: string =
+          testcasesDir + inFiles[i].replace(/\.in\./, '.out.');
+        fs.writeFileSync(resFilePath, execution.stdout);
+        execution.status = await verify(resFilePath, outFilePath);
+        execution.expect = await readFile(outFilePath);
+        executions.push(execution);
       }
-      resolve();
+      resolve(executions);
     });
   });
 }
