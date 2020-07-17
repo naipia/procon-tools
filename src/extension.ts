@@ -6,7 +6,6 @@ import * as atcoder from './atcoder';
 import * as webview from './webview';
 import { runAllTestcases, build, execute } from './run';
 import { LoginInfo, saveLoginInfo, getLoginInfo } from './login';
-import { getActiveFilePath } from './util';
 
 const conf = new Configuration();
 export let atcoderLogin = false;
@@ -37,6 +36,19 @@ async function contestController(inputUrl: string): Promise<void> {
       '"';
   }
   vscode.window.showInformationMessage(message);
+}
+
+export function getActiveFilePath(conf: Configuration): string | undefined {
+  const editor = vscode.window.activeTextEditor;
+  if (!editor) {
+    return undefined;
+  }
+
+  const activeFilePath: string = editor.document.fileName;
+  if (activeFilePath.split('.').pop() !== conf.extension) {
+    return undefined;
+  }
+  return activeFilePath;
 }
 
 export function activate(context: vscode.ExtensionContext): void {
