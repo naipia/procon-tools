@@ -81,6 +81,7 @@ export function runAllTestcases(
     fs.readdir(testcasesDir, async (err, files) => {
       if (err) {
         console.error(err);
+        resolve([]);
       }
       const executions: Execution[] = [];
       const inFiles: string[] = files.filter((file) => {
