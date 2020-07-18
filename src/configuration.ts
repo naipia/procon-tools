@@ -55,4 +55,25 @@ export class Configuration {
       ? fs.readFileSync(templateFilePath, 'utf8').toString()
       : '';
   }
+
+  getBuildCommand(source: string): string {
+    return this.build.replace('%S', source);
+  }
+
+  getCustomTestHTML(context: vscode.ExtensionContext): Promise<string> {
+    return new Promise((resolve) => {
+      fs.readFile(
+        context.extensionPath + '/html/custom_test.html',
+        'utf8',
+        (err, data) => {
+          if (err) {
+            console.error(err);
+            resolve('');
+            return;
+          }
+          resolve(data);
+        }
+      );
+    });
+  }
 }

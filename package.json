@@ -2,7 +2,7 @@
   "name": "procon-tools",
   "displayName": "Procon Tools",
   "description": "Procon Tools supports you in competitive programming using online judges.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "engines": {
     "vscode": "^1.44.0"
   },
@@ -13,7 +13,8 @@
     "onCommand:procon-tools.contest",
     "onCommand:procon-tools.login",
     "onCommand:procon-tools.test",
-    "onCommand:procon-tools.submit"
+    "onCommand:procon-tools.submit",
+    "onCommand:procon-tools.custom-test"
   ],
   "publisher": "naipia",
   "main": "./out/extension.js",
@@ -35,6 +36,10 @@
       {
         "command": "procon-tools.submit",
         "title": "Procon: Submit code"
+      },
+      {
+        "command": "procon-tools.custom-test",
+        "title": "Procon: Custom test"
       }
     ],
     "menus": {
@@ -46,7 +51,7 @@
         }
       ]
     },
-    "keybindings":[
+    "keybindings": [
       {
         "command": "procon-tools.test",
         "key": "alt+enter"
@@ -123,6 +128,7 @@
     "vscode-test": "^1.3.0"
   },
   "dependencies": {
-    "cheerio-httpcli": "^0.7.4"
+    "cheerio-httpcli": "^0.7.4",
+    "tree-kill": "^1.2.2"
   }
 }

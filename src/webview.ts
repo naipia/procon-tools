@@ -44,19 +44,19 @@ export async function updateResults(
   context: vscode.ExtensionContext,
   panel: vscode.WebviewPanel,
   sourceFile: string,
-  results: string[][]
+  results: Execution[]
 ): Promise<void> {
   const mainDoc: string = await getMainHTML(context);
   const caseDoc: string = await getCaseHTML(context);
   let cases = '';
   for (let i = 0; i < results.length; i++) {
-    cases +=
-      caseDoc
-        .replace('%INPUT', results[i][0])
-        .replace('%EXPECT', results[i][1])
-        .replace('%RESULT', results[i][2])
-        .replace(/%STATUS/g, results[i][3])
-        .replace(/%IID/g, 'input' + String(i + 1)) + '\n';
+    cases += caseDoc
+      .replace('%INPUT', results[i].stdin)
+      .replace('%EXPECT', results[i].expect)
+      .replace('%RESULT', results[i].stdout)
+      .replace(/%EXECTIME/, results[i].time)
+      .replace(/%STATUS/g, results[i].status)
+      .replace(/%IID/g, 'input' + String(i));
   }
   panel.webview.html = mainDoc
     .replace('%TITLE', sourceFile.split('.')[0].replace('_', ' ').toUpperCase())
@@ -67,11 +67,33 @@ export async function updateCompilationError(
   context: vscode.ExtensionContext,
   panel: vscode.WebviewPanel,
   sourceFile: string,
-  message: string
+  error: string
 ): Promise<void> {
   const mainDoc: string = await getMainHTML(context);
   const errDoc: string = await getCompilationErrorHTML(context);
   panel.webview.html = mainDoc
     .replace('%TITLE', sourceFile.split('.')[0].replace('_', ' ').toUpperCase())
-    .replace('%CASE', errDoc.replace('%MESSAGE', message));
+    .replace('%CASE', errDoc.replace('%MESSAGE', error));
+}
+
+export function updateCustomTest(
+  panel: vscode.WebviewPanel,
+  data: string,
+  obj: SourceFileObj,
+  execution: Execution = {
+    stdin: '',
+    expect: '',
+    stdout: '',
+    stderr: '',
+    time: '',
+    status: '',
+  }
+): void {
+  panel.webview.html = data
+    .replace('%SOURCE_PATH', obj.source)
+    .replace(/%FILENAME/g, obj.filename)
+    .replace('%STDIN', execution.stdin)
+    .replace('%STDOUT', execution.stdout)
+    .replace('%STDERR', execution.stderr)
+    .replace('%EXECTIME', execution.time);
 }

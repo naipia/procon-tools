@@ -13,6 +13,7 @@ Give the following commands to the VSCode command palette:
   - Source files needed for the contest are automatically generated when you run `Start contest` command.
 - `Run tests` (Alt+Enter): Run all testcases
   - This extension will run the code in the source file and check the answers to all the tests when you run `Run tests` command or press <img src="img/run.png" width="15"> button.
+- `Custom test`: Run Custom test
 - `Submit code`: Submit code
   - This extension will submit the code based on the generated source file when you run `Submit code` command.
 - `Login`: Login
@@ -22,10 +23,8 @@ Give the following commands to the VSCode command palette:
 
 - [AtCoder](https://atcoder.jp/)
 
-### Scheduled to be supported
-
-- [Codeforces](https://codeforces.com/)
-- [yukicoder](https://yukicoder.me/)
+<!-- - [Codeforces](https://codeforces.com/) -->
+<!-- - [yukicoder](https://yukicoder.me/) -->
 
 ## Supported languages
 
