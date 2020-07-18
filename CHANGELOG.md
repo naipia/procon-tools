@@ -2,6 +2,12 @@
 
 <!-- ## [Unreleased] -->
 
+## 0.4
+
+- Added custom test
+- Added display of execution time
+- Fixed timeout
+
 ## 0.3
 
 - Added display of compile error
