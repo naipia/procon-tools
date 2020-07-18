@@ -4,32 +4,6 @@ import { exec } from 'child_process';
 import * as kill from 'tree-kill';
 import { performance } from 'perf_hooks';
 
-function verify(resFilePath: string, outFilePath: string): Promise<string> {
-  return new Promise((resolve) => {
-    exec(
-      'diff -qBb --strip-trailing-cr ' + resFilePath + ' ' + outFilePath,
-      (err, stdout) => {
-        if (stdout !== '') {
-          resolve('WA');
-        } else {
-          resolve('AC');
-        }
-      }
-    );
-  });
-}
-
-function readFile(filePath: string): Promise<string> {
-  return new Promise((resolve) => {
-    fs.readFile(filePath, 'utf8', (err, data) => {
-      if (err) {
-        console.error(err);
-      }
-      resolve(data.trim());
-    });
-  });
-}
-
 export function build(buildCommand: string): Promise<string | null> {
   return new Promise((resolve) => {
     if (buildCommand === '') {
@@ -56,7 +30,8 @@ export function execute(command: string, stdin: string): Promise<Execution> {
     };
     const start = performance.now();
     const process = exec(command, (err, stdout, stderr) => {
-      execution.time = String((performance.now() - start).toFixed(0)) + ' ms';
+      const stop = performance.now();
+      execution.time = String((stop - start).toFixed(0)) + ' ms';
       execution.stdout = stdout;
       execution.stderr = stderr;
       if (err) {
@@ -70,6 +45,32 @@ export function execute(command: string, stdin: string): Promise<Execution> {
       kill(process.pid);
       resolve(execution);
     }, 3000);
+  });
+}
+
+function readFile(filePath: string): Promise<string> {
+  return new Promise((resolve) => {
+    fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+        console.error(err);
+      }
+      resolve(data.trim());
+    });
+  });
+}
+
+function verify(resFilePath: string, outFilePath: string): Promise<string> {
+  return new Promise((resolve) => {
+    exec(
+      'diff -qBb --strip-trailing-cr ' + resFilePath + ' ' + outFilePath,
+      (err, stdout) => {
+        if (stdout !== '') {
+          resolve('WA');
+        } else {
+          resolve('AC');
+        }
+      }
+    );
   });
 }
 

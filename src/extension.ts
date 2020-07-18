@@ -105,7 +105,6 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
 
-      vscode.window.showInformationMessage('Running testcases...');
       const executions: Execution[] = await runAllTestcases(
         testcasesDir,
         conf.command
