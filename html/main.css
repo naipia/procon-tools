@@ -1,0 +1,63 @@
+body {
+  background-color: #fff;
+  color: #000;
+}
+pre {
+  padding: 9px;
+  color: #333;
+  background-color: #dadada;
+  border: 1px solid #ccc;
+  font-family: Menlo;
+  border-radius: .25em;
+  white-space: pre-wrap;
+}
+
+details,
+button {
+  cursor: pointer;
+}
+
+.AC {
+  background-color: #5cb85c;
+}
+.WA,
+.CE,
+.RE {
+  background-color: #f0ad4e;
+}
+
+.label {
+  color: #fff;
+  padding: .2em .6em .3em;
+  font-size: 80%;
+  font-weight: 700;
+  border-radius: .25em;
+}
+
+.div-btn {
+  position: relative;
+}
+.btn-copy {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.btn-copy:hover {
+  background: #333;
+  color: #fff;
+}
+
+.input {
+  width: 100%;
+  font-size: 14px;
+  font-family: Menlo;
+  border-radius: .25em;
+}
+
+.btn {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  font-family: Menlo;
+  border-radius: .25em;
+}
