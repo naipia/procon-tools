@@ -1,6 +1,8 @@
 # Change Log
 
-<!-- ## [Unreleased] -->
+## 0.4.1
+
+- Updated webview
 
 ## 0.4
 
