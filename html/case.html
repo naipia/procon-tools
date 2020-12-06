@@ -1,16 +1,19 @@
 <section>
-<h3>Sample Input </h3>
-<div class="div-btn">
-  <button class="btn-copy" id="copy" onclick="copy('%IID')">Copy</button>
-</div>
-<pre id='%IID'>%INPUT</pre>
+  <h3>Sample Input </h3>
+  <div class="div-btn"><button class="btn btn-copy" id="copy" onclick="copy('%IID%')">Copy</button></div>
+  <pre id='%IID%'>%INPUT%</pre>
 </section>
 
 <section>
-<h3>Expect</h3><pre>%EXPECT</pre>
+  <h3>Expect</h3><pre>%EXPECT%</pre>
 </section>
 
 <section>
-<h3>Result (Status: <span class='label %STATUS'>%STATUS</span>) (Exectime: %EXECTIME)</h3><pre>%RESULT</pre>
+  <h3>Result (Status: <span class='label %STATUS%'>%STATUS%</span>) (Exectime: %EXECTIME%)</h3><pre>%RESULT%</pre>
 </section>
+
+<details>
+  <summary>Stderr</summary>
+  <pre>%STDERR%</pre>
+</details>
 <hr>

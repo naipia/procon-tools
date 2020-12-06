@@ -35,7 +35,8 @@ export function execute(command: string, stdin: string): Promise<Execution> {
       execution.stdout = stdout;
       execution.stderr = stderr;
       if (err) {
-        execution.stderr += String(err);
+        execution.stdout += String(err);
+        execution.status = 'RE';
       }
       resolve(execution);
     });
@@ -96,7 +97,9 @@ export function runAllTestcases(
         const outFilePath: string =
           testcasesDir + inFiles[i].replace(/\.in\./, '.out.');
         fs.writeFileSync(resFilePath, execution.stdout);
-        execution.status = await verify(resFilePath, outFilePath);
+        if (execution.status === 'WJ') {
+          execution.status = await verify(resFilePath, outFilePath);
+        }
         execution.expect = await readFile(outFilePath);
         executions.push(execution);
       }

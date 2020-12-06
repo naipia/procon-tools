@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as url from 'url';
 import * as path from 'path';
+
 import { Configuration } from './configuration';
 import * as atcoder from './atcoder';
 import * as webview from './webview';
@@ -10,7 +11,7 @@ import { LoginInfo, saveLoginInfo, getLoginInfo } from './login';
 const conf = new Configuration();
 export let atcoderLogin = false;
 
-async function contestController(inputUrl: string): Promise<void> {
+async function siteController(inputUrl: string): Promise<void> {
   const contestUrlParse: url.UrlWithStringQuery = url.parse(inputUrl);
   const contestUrlParseHost: string | null = contestUrlParse.host;
   if (!contestUrlParseHost) {
@@ -25,10 +26,10 @@ async function contestController(inputUrl: string): Promise<void> {
     }
     const text = atcoder.contestInit(conf, contestUrlParse);
     if (!text) {
-      message = 'Failed to initialize.';
-    } else {
-      message = 'AtCoder: ' + text;
+      vscode.window.showErrorMessage('Failed to initialize.');
+      return;
     }
+    message = 'AtCoder: ' + text;
   } else {
     message =
       'This extension dose not support this site: "' +
@@ -43,7 +44,6 @@ export function getActiveFilePath(conf: Configuration): string | undefined {
   if (!editor) {
     return undefined;
   }
-
   const activeFilePath: string = editor.document.fileName;
   if (activeFilePath.split('.').pop() !== conf.extension) {
     return undefined;
@@ -51,11 +51,30 @@ export function getActiveFilePath(conf: Configuration): string | undefined {
   return activeFilePath;
 }
 
+// エントリーポイント
+// activationEvents(package.json参照)が発生すると実行される。
+// 拡張機能のコマンドの登録を行う。
 export function activate(context: vscode.ExtensionContext): void {
   let panel: vscode.WebviewPanel;
   let isPanelAlive = false;
 
-  // Contest initialization
+  const resourceRoot = vscode.Uri.file(
+    path.join(context.extensionPath, 'html')
+  );
+
+  function panelInit(): vscode.WebviewPanel {
+    return vscode.window.createWebviewPanel(
+      'panel',
+      'Procon-tools',
+      vscode.ViewColumn.Beside,
+      {
+        localResourceRoots: [resourceRoot],
+        enableScripts: true,
+      }
+    );
+  }
+
+  // コマンド: contest
   const cmd1 = vscode.commands.registerCommand('procon-tools.contest', () => {
     vscode.window
       .showInputBox({
@@ -69,11 +88,11 @@ export function activate(context: vscode.ExtensionContext): void {
         if (!inputUrl) {
           return;
         }
-        contestController(inputUrl);
+        siteController(inputUrl);
       });
   });
 
-  // Run testcases and display their results
+  // コマンド: test
   const cmd2 = vscode.commands.registerCommand(
     'procon-tools.test',
     async () => {
@@ -87,14 +106,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const buildCommand: string = conf.build.replace('%S', activeFilePath);
 
       if (!isPanelAlive) {
-        panel = vscode.window.createWebviewPanel(
-          'panel',
-          'Procon-tools',
-          vscode.ViewColumn.Beside,
-          {
-            enableScripts: true,
-          }
-        );
+        panel = panelInit();
         isPanelAlive = true;
       }
 
@@ -119,7 +131,7 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
 
-  // Login to a selected contest website
+  // コマンド: login
   const cmd3 = vscode.commands.registerCommand('procon-tools.login', () => {
     vscode.window.showQuickPick(['AtCoder']).then(async (contestName) => {
       const username: string | undefined = await vscode.window.showInputBox({
@@ -154,7 +166,7 @@ export function activate(context: vscode.ExtensionContext): void {
     });
   });
 
-  // Submit a code
+  // コマンド: submit
   const cmd4 = vscode.commands.registerCommand(
     'procon-tools.submit',
     async () => {
@@ -189,6 +201,7 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   );
 
+  // コマンド: custom test
   const cmd5 = vscode.commands.registerCommand(
     'procon-tools.custom-test',
     async () => {
@@ -202,21 +215,13 @@ export function activate(context: vscode.ExtensionContext): void {
         panel.dispose();
       }
       isPanelAlive = true;
-      panel = vscode.window.createWebviewPanel(
-        'panel',
-        'Procon-tools',
-        vscode.ViewColumn.Beside,
-        {
-          enableScripts: true,
-        }
-      );
+      panel = panelInit();
 
-      const data: string = await conf.getCustomTestHTML(context);
       const customObj: SourceFileObj = {
         source: activeFilePath,
         filename: sourceFile,
       };
-      webview.updateCustomTest(panel, data, customObj);
+      webview.updateCustomTest(context, panel, customObj);
 
       panel.onDidDispose(() => {
         isPanelAlive = false;
@@ -235,17 +240,16 @@ export function activate(context: vscode.ExtensionContext): void {
           time: '',
           status: '',
         };
-        const data: string = await conf.getCustomTestHTML(context);
+
         const error: string | null = await build(
           conf.getBuildCommand(obj.source)
         );
         if (error) {
-          execution.stderr = error;
-          webview.updateCustomTest(panel, data, customObj, execution);
-          return;
+          execution.stdout = error;
+        } else {
+          execution = await execute(conf.command, obj.stdin);
         }
-        execution = await execute(conf.command, obj.stdin);
-        webview.updateCustomTest(panel, data, customObj, execution);
+        webview.updateCustomTest(context, panel, customObj, execution);
       });
     }
   );

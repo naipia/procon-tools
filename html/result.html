@@ -3,53 +3,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Result</title>
-  <style>
-    body {
-      background-color: #fff;
-      color: #000;
-    }
-    pre {
-      padding: 9px;
-      color: #333;
-      background-color: #dadada;
-      border: 1px solid #ccc;
-      font-family: Menlo;
-      border-radius: .25em;
-      white-space: pre-wrap;
-    }
-    .AC {
-      background-color: #5cb85c;
-    }
-    .WA {
-      background-color: #f0ad4e;
-    }
-    .CE {
-      background-color: #f0ad4e;
-    }
-    .label {
-      color: #fff;
-      padding: .2em .6em .3em;
-      font-size: 80%;
-      font-weight: 700;
-      border-radius: .25em;
-    }
-    .div-btn {
-      position: relative;
-    }
-    .btn-copy {
-      position: absolute;
-      top: 0;
-      right: 0;
-      background-color: #fff;
-      border: 1px solid #ccc;
-      font-family: Menlo;
-      border-radius: .25em;
-    }
-    .btn-copy:hover {
-      background: #333;
-      color: #fff;
-    }
-  </style>
+  <link rel="stylesheet" type="text/css" href="main.css">
+
   <script>
     function copy(textId) {
       const copyText = document.getElementById(textId).textContent;
@@ -64,10 +19,10 @@
 
 <body>
 
-<h3>%TITLE</h3>
+<h3>%TITLE%</h3>
 <hr>
 
-%CASE
+%CASE%
 
 </body>
 </html>
