@@ -52,24 +52,22 @@ function createSource(filename: string, data: string): Promise<void> {
 }
 
 function getTestcases(taskUrl: string, taskDir: string): void {
+  const testcasesDir = taskDir + '/testcases/';
   cheerio.fetch(taskUrl, {}).then((result) => {
     let num = 1;
     result.$('section').each((i, elem) => {
       const text1 = result.$(elem).find('h3').text();
-      const text2 = result.$(elem).find('pre').text();
+      const text2 = result.$(elem).find('pre').slice(0).eq(0).text();
       if (text1.includes('入力例')) {
-        const filename: string =
-          taskDir + '/testcases/' + Math.floor((num + 1) / 2) + '.in.txt';
+        const filename = testcasesDir + num.toString() + '.in.txt';
         fs.writeFile(filename, text2, (err) => {
           if (err) {
             console.error(err);
           }
         });
-        num++;
       }
       if (text1.includes('出力例')) {
-        const filename: string =
-          taskDir + '/testcases/' + Math.floor((num + 1) / 2) + '.out.txt';
+        const filename = testcasesDir + num.toString() + '.out.txt';
         fs.writeFile(filename, text2, (err) => {
           if (err) {
             console.error(err);
