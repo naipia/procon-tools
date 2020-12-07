@@ -53,7 +53,7 @@ function readFile(filePath: string): Promise<string> {
   return new Promise((resolve) => {
     fs.readFile(filePath, 'utf8', (err, data) => {
       if (err) {
-        console.error(err);
+        resolve('');
       }
       resolve(data.trim());
     });
