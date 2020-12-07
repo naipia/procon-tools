@@ -2,7 +2,7 @@
   "name": "procon-tools",
   "displayName": "Procon Tools",
   "description": "Procon Tools supports you in competitive programming using online judges.",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "engines": {
     "vscode": "^1.44.0"
   },

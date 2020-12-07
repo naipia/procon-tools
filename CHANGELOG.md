@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.4.2
+
+- Fix saving testcase
+
 ## 0.4.1
 
 - Updated webview
