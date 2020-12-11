@@ -5,14 +5,10 @@ import * as path from 'path';
 import * as cheerio from 'cheerio-httpcli';
 import { exec } from 'child_process';
 import { Configuration } from './configuration';
-import { LoginInfo } from './login';
 
 const ATCODER_URL = 'https://atcoder.jp';
-
-interface SubmitInfo {
-  submitUrl: string;
-  taskName: string;
-}
+const SUBMIT_URL = 'https://atcoder.jp/contests/%CONTEST_NAME%/submit';
+const LOGIN_URL = 'https://atcoder.jp/login';
 
 function saveSubmitInfo(
   dir: string,
@@ -23,7 +19,11 @@ function saveSubmitInfo(
     submitUrl: submitUrl,
     taskName: taskName,
   };
-  fs.writeFileSync(dir + '/.submit', JSON.stringify(submitInfo, null));
+  fs.writeFile(dir + '/.submit', JSON.stringify(submitInfo, null), (err) => {
+    if (err) {
+      console.error(err);
+    }
+  });
 }
 
 function getSubmitInfo(activeFilePath: string): SubmitInfo {
@@ -111,10 +111,7 @@ export function contestInit(
 
   const leaf: string =
     contestUrlInfo.length === 5 ? contestUrlInfo.slice(-1)[0] : '';
-  const submitUrl: string = 'https://atcoder.jp/contests/%CONTEST_NAME/submit'.replace(
-    '%CONTEST_NAME',
-    contestName
-  );
+  const submitUrl: string = SUBMIT_URL.replace('%CONTEST_NAME%', contestName);
 
   const taskListUrl: string =
     ATCODER_URL + '/contests/' + contestName + '/tasks';
@@ -155,12 +152,12 @@ export function contestInit(
 
 export function login(loginInfo: LoginInfo): Promise<boolean> {
   return new Promise((resolve) => {
-    cheerio.fetch('https://atcoder.jp/login', {}).then((result) => {
+    cheerio.fetch(LOGIN_URL, {}).then((result) => {
       const csrfToken: string | undefined = result
         .$('form')
         .find('input')
         .attr('value');
-      if (csrfToken === undefined) {
+      if (!csrfToken) {
         return;
       }
 
