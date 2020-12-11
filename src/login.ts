@@ -1,10 +1,5 @@
 import * as fs from 'fs';
 
-export interface LoginInfo {
-  username: string;
-  password: string;
-}
-
 export function saveLoginInfo(
   contestName: string,
   homeDir: string,

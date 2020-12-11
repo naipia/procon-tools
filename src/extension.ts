@@ -6,7 +6,7 @@ import { Configuration } from './configuration';
 import * as atcoder from './atcoder';
 import * as webview from './webview';
 import { runAllTestcases, build, execute } from './run';
-import { LoginInfo, saveLoginInfo, getLoginInfo } from './login';
+import { saveLoginInfo, getLoginInfo } from './login';
 
 const conf = new Configuration();
 export let atcoderLogin = false;
@@ -39,7 +39,7 @@ async function siteController(inputUrl: string): Promise<void> {
   vscode.window.showInformationMessage(message);
 }
 
-export function getActiveFilePath(conf: Configuration): string | undefined {
+export function getActiveFilePath(): string | undefined {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
     return undefined;
@@ -96,7 +96,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const cmd2 = vscode.commands.registerCommand(
     'procon-tools.test',
     async () => {
-      const activeFilePath: string | undefined = getActiveFilePath(conf);
+      const activeFilePath: string | undefined = getActiveFilePath();
       if (!activeFilePath) {
         return;
       }
@@ -170,7 +170,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const cmd4 = vscode.commands.registerCommand(
     'procon-tools.submit',
     async () => {
-      const activeFilePath: string | undefined = getActiveFilePath(conf);
+      const activeFilePath: string | undefined = getActiveFilePath();
       if (!activeFilePath) {
         return;
       }
@@ -205,7 +205,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const cmd5 = vscode.commands.registerCommand(
     'procon-tools.custom-test',
     async () => {
-      const activeFilePath: string | undefined = getActiveFilePath(conf);
+      const activeFilePath: string | undefined = getActiveFilePath();
       if (!activeFilePath) {
         return;
       }
