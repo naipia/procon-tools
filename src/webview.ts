@@ -7,13 +7,13 @@ function getMainHTML(
   panel: vscode.WebviewPanel
 ): Promise<string> {
   return new Promise((resolve) => {
-    const filename: string = context.extensionPath + '/html/result.html';
+    const filename = context.extensionPath + '/html/result.html';
     fs.readFile(filename, 'utf8', (err, data) => {
       if (err) {
         console.error(err);
       }
       const cssPath = panel.webview.asWebviewUri(
-        vscode.Uri.file(path.join(context.extensionPath, 'html/main.css'))
+        vscode.Uri.file(path.join(context.extensionPath, 'html', 'main.css'))
       );
       resolve(data.replace('main.css', cssPath.toString()));
     });

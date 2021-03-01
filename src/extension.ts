@@ -39,6 +39,7 @@ async function siteController(inputUrl: string): Promise<void> {
   vscode.window.showInformationMessage(message);
 }
 
+// VSCodeで現在アクティブなファイルのパスを返す。
 export function getActiveFilePath(): string | undefined {
   const editor = vscode.window.activeTextEditor;
   if (!editor) {
@@ -46,6 +47,9 @@ export function getActiveFilePath(): string | undefined {
   }
   const activeFilePath: string = editor.document.fileName;
   if (activeFilePath.split('.').pop() !== conf.extension) {
+    vscode.window.showErrorMessage(
+      'The file extension is not "' + conf.extension + '"'
+    );
     return undefined;
   }
   return activeFilePath;
@@ -113,7 +117,6 @@ export function activate(context: vscode.ExtensionContext): void {
       const error: string | null = await build(buildCommand);
       if (error) {
         webview.updateCompilationError(context, panel, sourceFile, error);
-        vscode.window.showInformationMessage('Compilation Error');
         return;
       }
 
