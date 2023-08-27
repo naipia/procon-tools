@@ -13,7 +13,7 @@ export class Configuration {
   command!: string;
   confirmation!: boolean;
   template!: string;
-  atdocerID!: string;
+  atcoderSubmitIDs!: string[];
 
   constructor() {
     if (process.platform === 'win32') {
@@ -31,7 +31,7 @@ export class Configuration {
     }
     const proconPath = this.conf.get('home', '~/contests') + '/';
     this.proconRoot = proconPath.replace('//', '/').replace(/^~/, this.homeDir);
-    this.language = this.conf.get('language', 'C++');
+    this.language = this.conf.get('language', 'C++(GCC)');
     const selectedLanguage = languages.getLanguage(this.language);
     this.extension = selectedLanguage.extension;
     const buildOptions = this.conf.get('options', '');
@@ -39,7 +39,7 @@ export class Configuration {
       .replace(/%TMP/, os.tmpdir())
       .replace('%OPTIONS', buildOptions);
     this.command = selectedLanguage.command.replace(/%TMP/, os.tmpdir());
-    this.atdocerID = selectedLanguage.atdocerID;
+    this.atcoderSubmitIDs = [...selectedLanguage.atcoderSubmitIDs];
     this.confirmation = this.conf.get('pre-submission', true);
     this.getTemplate(this.conf.get('template', ''));
   }

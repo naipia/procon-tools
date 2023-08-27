@@ -219,17 +219,24 @@ export async function submit(
           return;
         }
 
-        const option: string = 'option[data-mime="%DATAMIME"]'.replace(
-          '%DATAMIME',
-          conf.atdocerID
-        );
+        const options = result.$('div[id=select-lang]').find('select');
+        console.log(options);
+        let languageID: string | undefined;
+        for (const id of conf.atcoderSubmitIDs) {
+          if (
+            options
+              .find('option[value="%VALUE%"]'.replace('%VALUE%', id))
+              .attr('value')
+          ) {
+            languageID = id;
+            break;
+          }
+        }
 
-        const languageID: string | undefined = result
-          .$('div[id=select-lang]')
-          .find('select')
-          .find(option)
-          .attr('value');
         if (!languageID) {
+          vscode.window.showInformationMessage(
+            'Could not specify languageID for submission'
+          );
           return;
         }
 

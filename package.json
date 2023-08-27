@@ -73,10 +73,10 @@
         "procon-tools.language": {
           "type": "string",
           "enum": [
-            "C++",
+            "C++(GCC)",
             "Go"
           ],
-          "default": "C++",
+          "default": "C++(GCC)",
           "description": "Set a language of automatically generated source files"
         },
         "procon-tools.options": {

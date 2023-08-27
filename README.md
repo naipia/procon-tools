@@ -28,5 +28,5 @@ Give the following commands to the VSCode command palette:
 
 ## Supported languages
 
-- `C++`
+- `C++(GCC)`
 - `Go`
