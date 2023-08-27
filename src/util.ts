@@ -103,7 +103,11 @@ export async function createSource(
   data: string
 ): Promise<void> {
   fs.access(filepath).catch(() => {
-    fs.writeFile(filepath, data);
+    fs.writeFile(filepath, data).catch(() => {
+      vscode.window.showErrorMessage(
+        'Could not create ' + filepath + '. Please try again.'
+      );
+    });
   });
 }
 

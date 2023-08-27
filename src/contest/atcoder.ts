@@ -103,7 +103,7 @@ export async function contestInit(
 
     files.push(filename);
 
-    createSource(files[i], conf.template);
+    createSource(filename, conf.template);
     getTestcases(ATCODER_URL + contestUrl, taskDir);
     saveSubmitInfo(taskDir, submitUrl, taskName);
   }
