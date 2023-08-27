@@ -4,16 +4,16 @@ import { exec } from 'child_process';
 import * as kill from 'tree-kill';
 import { performance } from 'perf_hooks';
 
-export function build(buildCommand: string): Promise<string | null> {
+export function build(buildCommand: string): Promise<string | undefined> {
   return new Promise((resolve) => {
     if (buildCommand === '') {
-      resolve(null);
+      resolve(undefined);
     }
     exec(buildCommand, (err) => {
       if (err) {
         resolve(String(err));
       }
-      resolve(null);
+      resolve(undefined);
     });
   });
 }
