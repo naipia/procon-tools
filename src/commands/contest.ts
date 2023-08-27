@@ -49,7 +49,7 @@ export function contest(conf: Configuration): void {
     .showInputBox({
       ignoreFocusOut: true,
       prompt: 'Get ready?',
-      placeHolder: 'Contest URL',
+      placeHolder: 'URL of contest top page or task page',
       validateInput: (param) => {
         return /^https?:\/\//.test(param) ? '' : 'Please enter the URL';
       },
