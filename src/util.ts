@@ -105,7 +105,7 @@ export async function createSource(
   fs.access(filepath).catch(() => {
     fs.writeFile(filepath, data).catch(() => {
       vscode.window.showErrorMessage(
-        'Could not create ' + filepath + '. Please try again.'
+        'Could not create ' + filepath + 'from template. Please try again.'
       );
     });
   });
