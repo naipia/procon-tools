@@ -2,26 +2,26 @@ interface Language {
   extension: string;
   build: string;
   command: string;
-  atdocerID: string;
+  atcoderSubmitIDs: string[];
 }
 
-const cPlusPlus: Language = {
+const cPlusPlusGcc: Language = {
   extension: 'cpp',
   build: 'g++ -o %TMP/main %OPTIONS %S',
   command: '%TMP/main',
-  atdocerID: 'text/x-c++src',
+  atcoderSubmitIDs: ['5001', '4003'],
 };
 
 const go: Language = {
   extension: 'go',
   build: 'go build -o %TMP/main %OPTIONS %S',
   command: '%TMP/main',
-  atdocerID: 'text/x-go',
+  atcoderSubmitIDs: ['5002', '4026'],
 };
 
 export const getLanguage = (name: string): Language => {
-  if (name === 'C++') {
-    return cPlusPlus;
+  if (name === 'Go') {
+    return go;
   }
-  return go;
+  return cPlusPlusGcc;
 };

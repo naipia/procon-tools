@@ -11,3 +11,13 @@ interface Execution {
   time: string;
   status: string;
 }
+
+interface SubmitInfo {
+  submitUrl: string;
+  taskName: string;
+}
+
+interface LoginInfo {
+  username: string;
+  password: string;
+}

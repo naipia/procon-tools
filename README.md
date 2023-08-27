@@ -1,6 +1,6 @@
 # Procon Tools
 
-![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/naipia.procon-tools)[![GitHub license](https://img.shields.io/github/license/naipia/procon-tools)](https://github.com/naipia/procon-tools)
+[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/naipia.procon-tools)](https://marketplace.visualstudio.com/items?itemName=naipia.procon-tools) [![GitHub license](https://img.shields.io/github/license/naipia/procon-tools)](https://github.com/naipia/procon-tools)
 
 **Procon Tools** is VSCode extension that supports you in competitive programming using online judges.
 
@@ -28,5 +28,5 @@ Give the following commands to the VSCode command palette:
 
 ## Supported languages
 
-- `C++`
+- `C++(GCC)`
 - `Go`
