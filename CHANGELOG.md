@@ -1,8 +1,11 @@
 # Change Log
 
+## 0.5
+- Fix AtCoder submission
+
 ## 0.4.2
 
-- Fix saving testcase
+- Fix saving test cases
 
 ## 0.4.1
 
