@@ -221,7 +221,6 @@ export async function submit(
         }
 
         const options = result.$('div[id=select-lang]').find('select');
-        console.log(options);
         let languageID: string | undefined;
         for (const id of conf.atcoderSubmitIDs) {
           if (
