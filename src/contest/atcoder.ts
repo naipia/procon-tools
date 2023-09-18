@@ -102,6 +102,7 @@ export async function contestInit(
       taskDir + '/' + contestName + '_' + alphabet + '.' + conf.extension;
 
     files.push(filename);
+    await fs.mkdir(taskDir, { recursive: true });
 
     createSource(filename, conf.template);
     getTestcases(ATCODER_URL + contestUrl, taskDir);
